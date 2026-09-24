@@ -15,6 +15,7 @@ import {
   type Material,
 } from 'three'
 import { useStore } from '../store'
+import { drive } from '../drive'
 import { TAU, mod } from '../sim'
 import type { V3 } from './Part'
 
@@ -214,7 +215,8 @@ export function FlowDots({
     const s = useStore.getState()
     mesh.visible = s.running
     if (!s.running) return
-    const factor = Math.min(6, Math.max(0.15, (s.rpm / 1000) * (s.slow / 0.05)))
+    const rpm = s.driveMode ? drive.rpm : s.rpm
+    const factor = Math.min(6, Math.max(0.15, (rpm / 1000) * (s.slow / 0.05)))
     t.current += Math.min(dt, 0.05) * speed * factor
     for (let i = 0; i < count; i++) {
       curve.getPointAt(mod(i / count + t.current, 1), dummy.position)

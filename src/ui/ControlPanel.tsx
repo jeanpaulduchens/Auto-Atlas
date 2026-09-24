@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { PARTS, SYSTEMS, SYSTEM_ORDER, type SystemId } from '../data/parts'
 import { CYLINDERS, FINAL_DRIVE, GEAR_RATIOS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
 import { useStore } from '../store'
+import { resetDrive, shiftTo, toggleEngine } from '../drive'
+import { setSound } from '../audio'
 
 const SPEEDS = [
   { label: '×0.02', value: 0.02 },
@@ -123,14 +125,30 @@ export function ControlPanel() {
           <section>
             <h2>Motor</h2>
             <div className="btns">
-              <button className={s.running ? 'on' : ''} onClick={() => s.set({ running: !s.running })}>
+              <button className={s.running ? 'on' : ''} onClick={toggleEngine}>
                 {s.running ? '■ Apagar' : '▶ Encender'}
               </button>
+              <button
+                className={s.driveMode ? 'on' : ''}
+                onClick={() => {
+                  resetDrive()
+                  s.set({ driveMode: !s.driveMode, clutch: false })
+                }}
+              >
+                {s.driveMode ? 'Salir de manejo' : 'Manejar'}
+              </button>
+              <button className={s.sound ? 'on' : ''} onClick={() => setSound(!s.sound)} aria-pressed={s.sound}>
+                {s.sound ? 'Sonido: sí' : 'Sonido: no'}
+              </button>
             </div>
-            <label className="row">
-              <span>{s.rpm} rpm</span>
-              <input type="range" min={700} max={6500} step={50} value={s.rpm} onChange={(e) => s.set({ rpm: +e.target.value })} />
-            </label>
+            {s.driveMode ? (
+              <p className="note">Acelera, frena y cambia con el teclado o los pedales de abajo. El sonido va a las rpm reales; la animación, en cámara lenta.</p>
+            ) : (
+              <label className="row">
+                <span>{s.rpm} rpm</span>
+                <input type="range" min={700} max={6500} step={50} value={s.rpm} onChange={(e) => s.set({ rpm: +e.target.value })} />
+              </label>
+            )}
             <div className="row">
               <span>Cámara lenta</span>
               <div className="seg">
@@ -148,17 +166,19 @@ export function ControlPanel() {
             <h2>Caja de cambios</h2>
             <div className="seg gears">
               {['N', '1', '2', '3', '4', '5'].map((g, i) => (
-                <button key={g} className={s.gear === i ? 'on' : ''} onClick={() => s.set({ gear: i })}>
+                <button key={g} className={s.gear === i ? 'on' : ''} onClick={() => shiftTo(i)}>
                   {g}
                 </button>
               ))}
             </div>
-            <div className="btns">
-              <button className={s.clutch ? 'on' : ''} onClick={() => s.set({ clutch: !s.clutch })}>
-                {s.clutch ? 'Soltar embrague' : 'Pisar embrague'}
-              </button>
-            </div>
-            <div className="readout">
+            {!s.driveMode && (
+              <>
+                <div className="btns">
+                  <button className={s.clutch ? 'on' : ''} onClick={() => s.set({ clutch: !s.clutch })}>
+                    {s.clutch ? 'Soltar embrague' : 'Pisar embrague'}
+                  </button>
+                </div>
+                <div className="readout">
               <div>
                 <b>{kmh.toFixed(0)}</b> km/h
               </div>
@@ -169,6 +189,8 @@ export function ControlPanel() {
                 <b>{s.gear > 0 ? (GEAR_RATIOS[s.gear] * FINAL_DRIVE).toFixed(1) : '–'}</b> : 1 total
               </div>
             </div>
+              </>
+            )}
           </section>
 
           <section>

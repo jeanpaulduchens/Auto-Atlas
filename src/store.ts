@@ -10,6 +10,11 @@ export interface AppState {
   slow: number
   gear: number
   clutch: boolean
+  /** Modo manejo: el motor y el auto responden a acelerador, freno, embrague y marchas. */
+  driveMode: boolean
+  sound: boolean
+  /** Aviso breve en pantalla (ej. “se paró el motor”); n cambia en cada aviso nuevo. */
+  toast: { text: string; n: number } | null
   selected: string | null
   hovered: string | null
   isolate: boolean
@@ -20,6 +25,7 @@ export interface AppState {
   select: (id: string | null, focus?: boolean) => void
   toggleSystem: (id: SystemId) => void
   focus: () => void
+  notify: (text: string) => void
 }
 
 /** Permite abrir una vista concreta: ?explode=1&body=0.2&gear=2&rpm=1500&select=ciguenal */
@@ -38,6 +44,9 @@ export const useStore = create<AppState>((set) => ({
   slow: num('slow', 0.05),
   gear: num('gear', 0),
   clutch: params.get('clutch') === '1',
+  driveMode: params.get('drive') === '1',
+  sound: false,
+  toast: null,
   selected: params.get('select'),
   hovered: null,
   isolate: false,
@@ -52,4 +61,5 @@ export const useStore = create<AppState>((set) => ({
     })),
   toggleSystem: (id) => set((s) => ({ hidden: { ...s.hidden, [id]: !s.hidden[id] } })),
   focus: () => set((s) => ({ focusNonce: s.focusNonce + 1 })),
+  notify: (text) => set((s) => ({ toast: { text, n: (s.toast?.n ?? 0) + 1 } })),
 }))

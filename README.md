@@ -10,6 +10,22 @@ npm install
 npm run dev                            # abre http://localhost:5173
 ```
 
+## Modo manejo
+
+Botón **Manejar** en el panel. El motor y el auto responden con física real (torque, embrague que
+patina, inercia, resistencia del aire) y el motor se para si sueltas mal el embrague.
+
+| Tecla | Acción |
+|---|---|
+| `W` / `↑` | Acelerar |
+| `S` / `↓` | Frenar |
+| `Espacio` | Embrague (mantener) |
+| `1`–`5`, `N` | Marchas (con el embrague pisado) |
+| `E` | Encender / apagar |
+
+**Sonido** (botón en el panel): sintetizado en el navegador. En modo demostración va sincronizado
+con la animación; en modo manejo suena a las rpm reales.
+
 ## Stack
 
 - **React + TypeScript + Vite**: la interfaz y el build.
@@ -22,6 +38,8 @@ npm run dev                            # abre http://localhost:5173
 src/
   data/parts.ts      Catálogo de piezas: nombre, sistema y explicación (lo que muestra el panel)
   sim.ts             Simulación mecánica: ángulos de cigüeñal, caja, ruedas; ciclo de 4 tiempos
+  drive.ts           Física del modo manejo (motor, embrague, auto)
+  audio.ts           Sonido del motor sintetizado (Web Audio)
   store.ts           Estado de la interfaz (zustand)
   scene/
     Part.tsx         Envoltorio de cada pieza: selección, resaltado, transparencia, explosión
@@ -62,6 +80,7 @@ Fuentes a revisar (siempre verificar la licencia de cada modelo):
 - [ ] Marcha atrás (engranaje intermedio) y horquillas de cambio
 - [ ] Diferencial en curva (ruedas a distinta velocidad)
 - [ ] Circuito de frenos con pedal, bomba y líquido
+- [x] Sonido del motor y modo manejo
 - [ ] Recorridos guiados paso a paso (“¿Qué pasa cuando aceleras?”)
 - [ ] Carrocería con un modelo `.glb` más realista
 - [ ] Más autos: tracción delantera con motor transversal, eléctrico

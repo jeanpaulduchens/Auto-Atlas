@@ -3,7 +3,8 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls } from '@react-three/drei'
 import { Vector3 } from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
-import { FINAL_DRIVE, GEAR_RATIOS, TAU, sim } from '../sim'
+import { FINAL_DRIVE, GEAR_RATIOS, TAU, WHEEL_RADIUS, sim } from '../sim'
+import { drive, stepDrive } from '../drive'
 import { useStore } from '../store'
 import { partBounds } from './registry'
 import { Body } from './Body'
@@ -41,6 +42,26 @@ function SimDriver() {
     } else {
       sim.explode = s.explode
     }
+    sim.stamp = performance.now()
+
+    if (s.driveMode) {
+      if (stepDrive(Math.min(rawDt, 0.1), s.gear, s.running)) {
+        s.set({ running: false })
+        s.notify('Se paró el motor. Presiona E para encender')
+      }
+      const wCrank = drive.omega * s.slow
+      const wWheel = (drive.v / WHEEL_RADIUS) * s.slow
+      const wOutput = wWheel * FINAL_DRIVE
+      // El disco de embrague va unido a la caja: con marcha, gira con las ruedas; en neutro, con el motor si está suelto
+      const wInput = s.gear > 0 ? wOutput * GEAR_RATIOS[s.gear] : drive.clutch > 0.5 ? wCrank : 0
+      sim.crank += wCrank * dt
+      sim.input += wInput * dt
+      sim.output += wOutput * dt
+      sim.wheel += wWheel * dt
+      if (s.running) sim.fan += (1800 / 60) * TAU * s.slow * dt
+      return
+    }
+
     if (!s.running) return
     const dCrank = (s.rpm / 60) * TAU * s.slow * dt
     const dInput = s.clutch ? 0 : dCrank
@@ -131,16 +152,16 @@ function GroundShadow() {
 
 export function Scene() {
   const select = useStore((s) => s.select)
-  const running = useStore((s) => s.running)
+  const animating = useStore((s) => s.running || s.driveMode)
   return (
     <Canvas
-      frameloop={running ? 'always' : 'demand'}
+      frameloop={animating ? 'always' : 'demand'}
       camera={{ position: START.position.toArray(), fov: 38, near: 0.05, far: 100 }}
       dpr={[1, 2]}
       onPointerMissed={(e) => e.type === 'click' && select(null)}
       onCreated={(state) => {
         // Solo en desarrollo: permite inspeccionar el renderer desde la consola (window.__atlas)
-        if (import.meta.env.DEV) Object.assign(window, { __atlas: state })
+        if (import.meta.env.DEV) Object.assign(window, { __atlas: state, __drive: drive })
       }}
     >
       <color attach="background" args={['#0b0e14']} />

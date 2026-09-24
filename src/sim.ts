@@ -16,6 +16,7 @@ export const sim = {
   output: 0, // eje secundario / cardán
   wheel: 0, // ruedas traseras (y delanteras, rodando)
   fan: 0,
+  stamp: 0, // performance.now() de la última actualización (para sincronizar el sonido)
   explode: +(new URLSearchParams(window.location.search).get('explode') ?? 0) || 0, // interpolado hacia el del store
 }
 
