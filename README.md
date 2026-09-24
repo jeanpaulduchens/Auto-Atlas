@@ -10,6 +10,12 @@ npm install
 npm run dev                            # abre http://localhost:5173
 ```
 
+## Sonido
+
+Botón **Sonido** en el panel (apagado por defecto). Se genera en el navegador, sin archivos:
+cada explosión suena cuando el cilindro se enciende en pantalla. En cámara lenta se oyen golpes
+separados; a velocidad real, el sonido continuo de un motor.
+
 ## Stack
 
 - **React + TypeScript + Vite**: la interfaz y el build.
@@ -22,6 +28,7 @@ npm run dev                            # abre http://localhost:5173
 src/
   data/parts.ts      Catálogo de piezas: nombre, sistema y explicación (lo que muestra el panel)
   sim.ts             Simulación mecánica: ángulos de cigüeñal, caja, ruedas; ciclo de 4 tiempos
+  audio.ts           Sonido del motor sincronizado con la animación (Web Audio)
   store.ts           Estado de la interfaz (zustand)
   scene/
     Part.tsx         Envoltorio de cada pieza: selección, resaltado, transparencia, explosión

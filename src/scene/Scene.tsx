@@ -41,6 +41,7 @@ function SimDriver() {
     } else {
       sim.explode = s.explode
     }
+    sim.stamp = performance.now()
     if (!s.running) return
     const dCrank = (s.rpm / 60) * TAU * s.slow * dt
     const dInput = s.clutch ? 0 : dCrank

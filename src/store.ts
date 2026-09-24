@@ -10,6 +10,7 @@ export interface AppState {
   slow: number
   gear: number
   clutch: boolean
+  sound: boolean
   selected: string | null
   hovered: string | null
   isolate: boolean
@@ -38,6 +39,7 @@ export const useStore = create<AppState>((set) => ({
   slow: num('slow', 0.05),
   gear: num('gear', 0),
   clutch: params.get('clutch') === '1',
+  sound: false,
   selected: params.get('select'),
   hovered: null,
   isolate: false,

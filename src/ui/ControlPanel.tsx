@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PARTS, SYSTEMS, SYSTEM_ORDER, type SystemId } from '../data/parts'
 import { CYLINDERS, FINAL_DRIVE, GEAR_RATIOS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
 import { useStore } from '../store'
+import { setSound } from '../audio'
 
 const SPEEDS = [
   { label: '×0.02', value: 0.02 },
@@ -125,6 +126,9 @@ export function ControlPanel() {
             <div className="btns">
               <button className={s.running ? 'on' : ''} onClick={() => s.set({ running: !s.running })}>
                 {s.running ? '■ Apagar' : '▶ Encender'}
+              </button>
+              <button className={s.sound ? 'on' : ''} onClick={() => setSound(!s.sound)} aria-pressed={s.sound}>
+                {s.sound ? 'Sonido: sí' : 'Sonido: no'}
               </button>
             </div>
             <label className="row">
