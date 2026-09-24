@@ -109,7 +109,7 @@ function CarBody() {
     [],
   )
   return (
-    <Part id="carroceria" explode={[0, 1.9, 0]} opacity={opacity}>
+    <Part id="carroceria" explode={[0, 1.9, 0]} opacity={opacity} section="shell">
       <mesh geometry={geos.lower} material={M.paint} />
       <mesh geometry={geos.cabin} material={M.paint} />
       <mesh geometry={geos.frontWin} material={M.windowGlass} />

@@ -80,7 +80,7 @@ function Hoses() {
   const upper = useMemo(() => curveThrough(UPPER_HOSE), [])
   const lower = useMemo(() => curveThrough(LOWER_HOSE), [])
   return (
-    <Part id="mangueras" explode={[0.5, 0.4, 0]}>
+    <Part id="mangueras" explode={[0.5, 0.4, 0]} cutaway section="translucent">
       <Pipe points={UPPER_HOSE} r={0.017} material={M.hose} />
       <Pipe points={LOWER_HOSE} r={0.017} material={M.hose} />
       <mesh position={UPPER_HOSE[0]} material={M.aluminum}>

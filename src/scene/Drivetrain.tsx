@@ -64,7 +64,7 @@ function Clutch() {
 function GearboxCase() {
   const cx = (CASE.x0 + CASE.x1) / 2
   return (
-    <Part id="caja-cambios" explode={[0, 0.45, 0.4]} cutaway>
+    <Part id="caja-cambios" explode={[0, 0.45, 0.4]} cutaway section="shell">
       <mesh position={[cx, (CASE.y0 + CASE.y1) / 2, 0]} material={M.housing}>
         <boxGeometry args={[CASE.x1 - CASE.x0, CASE.y1 - CASE.y0, 0.22]} />
       </mesh>
@@ -240,7 +240,7 @@ function Differential() {
 
 function AxleHousing() {
   return (
-    <Part id="puente-trasero" explode={[0, -0.3, 0]} cutaway>
+    <Part id="puente-trasero" explode={[0, -0.3, 0]} cutaway section="shell">
       <mesh position={[DIFF_X, WHEEL_Y, 0]} scale={[1, 1, 0.8]} material={M.housing}>
         <sphereGeometry args={[0.13, 32, 24]} />
       </mesh>

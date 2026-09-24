@@ -7,7 +7,9 @@ export function InfoPanel() {
   const set = useStore((s) => s.set)
   const select = useStore((s) => s.select)
   const focus = useStore((s) => s.focus)
-  if (!selected) return null
+  const touring = useStore((s) => s.tour !== null)
+  // Durante un recorrido, la tarjeta del paso ya explica la pieza y la vista necesita espacio
+  if (!selected || touring) return null
   const part = PARTS[selected]
   const system = SYSTEMS[part.system]
 

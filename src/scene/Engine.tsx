@@ -80,7 +80,7 @@ function ValveCover() {
   const cx = (ENGINE_FRONT_X + ENGINE_REAR_X) / 2
   const top = CAM_Y + 0.05
   return (
-    <Part id="tapa-valvulas" explode={[0, 0.85, 0]} cutaway>
+    <Part id="tapa-valvulas" explode={[0, 0.85, 0]} cutaway section="shell">
       <RoundedBox
         args={[ENGINE_FRONT_X - ENGINE_REAR_X, top - HEAD_TOP, 0.2]}
         radius={0.02}
@@ -97,7 +97,7 @@ function ValveCover() {
 function OilPan() {
   const top = CRANK_Y - 0.05
   return (
-    <Part id="carter" explode={[0, -0.35, 0]} cutaway>
+    <Part id="carter" explode={[0, -0.35, 0]} cutaway section="shell">
       <RoundedBox args={[0.4, 0.12, 0.15]} radius={0.015} position={[1.25, top - 0.055, 0]} material={M.darkSteel} />
       <mesh position={[1.3, top - 0.12, 0]} material={M.steel}>
         <cylinderGeometry args={[0.008, 0.008, 0.012, 6]} />

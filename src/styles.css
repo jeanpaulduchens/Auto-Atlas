@@ -30,6 +30,7 @@ canvas {
 
 .panel {
   position: fixed;
+  z-index: 10;
   top: 16px;
   width: 320px;
   max-height: calc(100vh - 32px);
@@ -277,6 +278,7 @@ button.link.active {
 
 .hud {
   position: fixed;
+  z-index: 10;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
@@ -292,6 +294,169 @@ button.link.active {
 }
 .hud b {
   color: var(--text);
+}
+
+/* Capa de etiquetas 3D: cubre el canvas, solo las etiquetas reciben clics */
+#labels-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+.lbl {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+}
+.lbl-dot {
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text);
+  box-shadow: 0 0 0 2px rgba(11, 14, 20, 0.8);
+}
+.lbl-line {
+  position: absolute;
+  left: -0.5px;
+  bottom: 0;
+  width: 1px;
+  height: var(--lift, 30px);
+  background: linear-gradient(to top, rgba(226, 232, 240, 0.9), rgba(226, 232, 240, 0.35));
+}
+.lbl-pill {
+  position: absolute;
+  bottom: var(--lift, 30px);
+  left: 0;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 3px 9px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: var(--panel);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+.lbl-pill:hover {
+  border-color: var(--accent);
+  background: rgba(17, 22, 31, 0.95);
+}
+.lbl.active .lbl-pill {
+  border-color: var(--accent);
+  color: #bfdbfe;
+}
+.lbl.active .lbl-dot {
+  background: var(--accent);
+}
+.lbl-swatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* Recorridos: lista en el panel */
+.tours {
+  display: grid;
+  gap: 6px;
+}
+.tour-item {
+  display: grid;
+  gap: 1px;
+  text-align: left;
+  padding: 8px 10px;
+}
+.tour-item-name {
+  font-weight: 600;
+}
+.tour-item-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+.tour-item.active {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.14);
+}
+
+/* Recorridos: tarjeta del paso actual */
+.tour {
+  position: fixed;
+  z-index: 10;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 32px));
+  padding: 14px 16px 12px;
+  display: grid;
+  gap: 6px;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+}
+.tour header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tour-name {
+  flex: 1;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.tour-count {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.tour h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  text-wrap: balance;
+}
+.tour p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.tour-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+.tour-nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.tour-dots {
+  display: flex;
+  gap: 6px;
+}
+.tour-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  border: none;
+  background: rgba(148, 163, 184, 0.35);
+}
+.tour-dots button.on {
+  background: var(--accent);
 }
 
 @media (max-width: 760px) {

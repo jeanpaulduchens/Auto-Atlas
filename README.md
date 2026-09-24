@@ -10,6 +10,17 @@ npm install
 npm run dev                            # abre http://localhost:5173
 ```
 
+## Cómo se usa
+
+- **Interior** (panel → Vista): *Cerrado*, *Translúcido* o *Corte*. El corte parte el auto, el motor y
+  la caja por la mitad, con rayado técnico en las caras cortadas.
+- **Desarmar**: separa las piezas y muestra una etiqueta por sistema; al tocar un sistema aparecen
+  las etiquetas de sus piezas.
+- **Recorridos**: secuencias de vistas con explicación (← → para avanzar, Esc para salir). Se definen en
+  `src/data/tours.ts`: cada paso indica qué piezas encuadrar y desde qué dirección, y la cámara calcula
+  la distancia sola, así que siguen funcionando si cambian los modelos.
+- **Enlaces a una vista**: `?interior=seccion&explode=1&select=ciguenal` o `?tour=ciclo&step=3`.
+
 ## Stack
 
 - **React + TypeScript + Vite**: la interfaz y el build.
@@ -21,10 +32,13 @@ npm run dev                            # abre http://localhost:5173
 ```
 src/
   data/parts.ts      Catálogo de piezas: nombre, sistema y explicación (lo que muestra el panel)
+  data/tours.ts      Recorridos guiados: pasos, encuadres y textos
   sim.ts             Simulación mecánica: ángulos de cigüeñal, caja, ruedas; ciclo de 4 tiempos
+  tours.ts           Navegación de los recorridos guiados
   store.ts           Estado de la interfaz (zustand)
   scene/
-    Part.tsx         Envoltorio de cada pieza: selección, resaltado, transparencia, explosión
+    Part.tsx         Envoltorio de cada pieza: selección, resaltado, transparencia, corte, explosión
+    Labels.tsx       Etiquetas sobre las piezas, acomodadas para no taparse
     layout.ts        Cotas del auto (dónde va cada cosa, en metros)
     helpers.tsx      Engranajes, resortes, correas, tubos, partículas de flujo
     Engine.tsx       Motor 4 cilindros DOHC 16v
@@ -62,6 +76,7 @@ Fuentes a revisar (siempre verificar la licencia de cada modelo):
 - [ ] Marcha atrás (engranaje intermedio) y horquillas de cambio
 - [ ] Diferencial en curva (ruedas a distinta velocidad)
 - [ ] Circuito de frenos con pedal, bomba y líquido
-- [ ] Recorridos guiados paso a paso (“¿Qué pasa cuando aceleras?”)
+- [x] Recorridos guiados paso a paso
+- [x] Corte de sección y etiquetas sobre las piezas
 - [ ] Carrocería con un modelo `.glb` más realista
 - [ ] Más autos: tracción delantera con motor transversal, eléctrico

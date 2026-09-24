@@ -82,7 +82,7 @@ export const PARTS: Record<string, PartInfo> = {
       'Dentro de sus paredes hay conductos por donde circula el refrigerante (camisas de agua) y galerías de aceite a presión.',
       'Por debajo sostiene el cigüeñal mediante los apoyos de bancada.',
     ],
-    fact: 'Activa “Corte” en el panel para ver el bloque translúcido y los pistones trabajando adentro.',
+    fact: 'En el panel, elige Interior → Corte para ver el bloque partido por la mitad y los pistones trabajando adentro.',
   },
   culata: {
     name: 'Culata',
@@ -325,7 +325,7 @@ export const PARTS: Record<string, PartInfo> = {
       'Es una caja manual de 5 velocidades. Los engranajes giran bañados en aceite.',
       'Marchas cortas (1ª, 2ª) dan mucha fuerza y poca velocidad; las largas (4ª, 5ª), lo contrario.',
     ],
-    fact: 'Activa “Corte” para ver los engranajes dentro de la carcasa.',
+    fact: 'En el panel, elige Interior → Corte para ver los engranajes dentro de la carcasa.',
   },
   'eje-primario': {
     name: 'Eje primario (de entrada)',

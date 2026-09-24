@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { PARTS, SYSTEMS, SYSTEM_ORDER, type SystemId } from '../data/parts'
 import { CYLINDERS, FINAL_DRIVE, GEAR_RATIOS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
-import { useStore } from '../store'
+import { useStore, type Interior } from '../store'
+import { TOURS } from '../data/tours'
+import { endTour, goToStep } from '../tours'
 
 const SPEEDS = [
   { label: '×0.02', value: 0.02 },
@@ -72,9 +74,43 @@ function SystemRow({ id }: { id: SystemId }) {
   )
 }
 
+const INTERIOR: { value: Interior; label: string }[] = [
+  { value: 'cerrado', label: 'Cerrado' },
+  { value: 'translucido', label: 'Translúcido' },
+  { value: 'seccion', label: 'Corte' },
+]
+
+function Tours() {
+  const tour = useStore((s) => s.tour)
+  return (
+    <section>
+      <h2>Recorridos</h2>
+      <div className="tours">
+        {TOURS.map((t) => {
+          const active = tour?.id === t.id
+          return (
+            <button
+              key={t.id}
+              className={`tour-item ${active ? 'active' : ''}`}
+              onClick={() => (active ? endTour() : goToStep(t.id, 0))}
+              aria-pressed={active}
+            >
+              <span className="tour-item-name">{t.name}</span>
+              <span className="tour-item-meta">
+                {t.blurb} · {t.steps.length} pasos
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export function ControlPanel() {
   const s = useStore()
-  const [collapsed, setCollapsed] = useState(false)
+  const collapsed = s.panelCollapsed
+  const setCollapsed = (v: boolean) => s.set({ panelCollapsed: v })
   const wheelRpm = s.running && !s.clutch && s.gear > 0 ? s.rpm / GEAR_RATIOS[s.gear] / FINAL_DRIVE : 0
   const kmh = (wheelRpm * TAU * WHEEL_RADIUS * 60) / 1000
 
@@ -92,6 +128,8 @@ export function ControlPanel() {
 
       {!collapsed && (
         <div className="scroll">
+          <Tours />
+
           <section>
             <h2>Vista</h2>
             <label className="row">
@@ -114,10 +152,16 @@ export function ControlPanel() {
                 onChange={(e) => s.set({ bodyOpacity: +e.target.value })}
               />
             </label>
-            <label className="check">
-              <input type="checkbox" checked={s.cutaway} onChange={(e) => s.set({ cutaway: e.target.checked })} />
-              Corte: bloque, culata y caja translúcidos
-            </label>
+            <div className="row">
+              <span>Interior</span>
+              <div className="seg" role="group" aria-label="Cómo se ven el motor, la caja y la carrocería por dentro">
+                {INTERIOR.map((o) => (
+                  <button key={o.value} className={s.interior === o.value ? 'on' : ''} onClick={() => s.set({ interior: o.value })}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
 
           <section>

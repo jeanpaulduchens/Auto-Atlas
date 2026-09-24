@@ -1,10 +1,15 @@
 import { create } from 'zustand'
 import { SYSTEM_ORDER, type SystemId } from './data/parts'
 
+export type V3 = [number, number, number]
+
+/** Cómo se muestran las carcasas (bloque, culata, caja…): cerradas, translúcidas o cortadas por la mitad. */
+export type Interior = 'cerrado' | 'translucido' | 'seccion'
+
 export interface AppState {
   explode: number
   bodyOpacity: number
-  cutaway: boolean
+  interior: Interior
   running: boolean
   rpm: number
   slow: number
@@ -14,25 +19,52 @@ export interface AppState {
   hovered: string | null
   isolate: boolean
   hidden: Record<SystemId, boolean>
+  /** Sistema elegido en la vista desarmada (muestra las etiquetas de sus piezas). */
+  activeSystem: SystemId | null
+  /** Recorrido guiado en curso. */
+  tour: { id: string; step: number } | null
   /** Se incrementa para pedirle a la cámara que enfoque la selección (o la vista general si no hay). */
   focusNonce: number
+  /** Vista de cámara pedida explícitamente (recorridos); n cambia en cada pedido. */
+  view: (CameraView & { n: number }) | null
+  panelCollapsed: boolean
   set: (patch: Partial<AppState>) => void
   select: (id: string | null, focus?: boolean) => void
   toggleSystem: (id: SystemId) => void
   focus: () => void
+  goTo: (view: CameraView) => void
 }
 
-/** Permite abrir una vista concreta: ?explode=1&body=0.2&gear=2&rpm=1500&select=ciguenal */
+/**
+ * Vista de cámara: encuadra unas piezas mirando desde una dirección (se adapta
+ * a cualquier modelo), o una posición y un objetivo fijos.
+ */
+export interface CameraView {
+  /** Piezas a encuadrar. */
+  frame?: string[]
+  /** Dirección desde las piezas hacia la cámara. */
+  dir?: V3
+  /** >1 aleja, <1 acerca. */
+  zoom?: number
+  cam?: V3
+  target?: V3
+}
+
+/** Permite abrir una vista concreta: ?explode=1&body=0.2&interior=seccion&gear=2&select=ciguenal&tour=ciclo&step=2 */
 const params = new URLSearchParams(window.location.search)
 const num = (key: string, fallback: number) => {
   const v = params.get(key)
   return v !== null && !Number.isNaN(+v) ? +v : fallback
 }
+const INTERIORS: Interior[] = ['cerrado', 'translucido', 'seccion']
+const interiorParam = params.get('interior') as Interior | null
+
+export const noneHidden = () => Object.fromEntries(SYSTEM_ORDER.map((s) => [s, false])) as Record<SystemId, boolean>
 
 export const useStore = create<AppState>((set) => ({
   explode: num('explode', 0),
   bodyOpacity: num('body', 1),
-  cutaway: params.get('cutaway') !== '0',
+  interior: interiorParam && INTERIORS.includes(interiorParam) ? interiorParam : 'translucido',
   running: params.get('running') !== '0',
   rpm: num('rpm', 900),
   slow: num('slow', 0.05),
@@ -41,15 +73,21 @@ export const useStore = create<AppState>((set) => ({
   selected: params.get('select'),
   hovered: null,
   isolate: false,
-  hidden: Object.fromEntries(SYSTEM_ORDER.map((s) => [s, false])) as Record<SystemId, boolean>,
+  hidden: noneHidden(),
+  activeSystem: null,
+  tour: null,
   focusNonce: 0,
+  view: null,
+  panelCollapsed: false,
   set: (patch) => set(patch),
   select: (id, focus = false) =>
     set((s) => ({
       selected: id,
       isolate: id ? s.isolate : false,
+      activeSystem: id ? s.activeSystem : null,
       focusNonce: focus ? s.focusNonce + 1 : s.focusNonce,
     })),
   toggleSystem: (id) => set((s) => ({ hidden: { ...s.hidden, [id]: !s.hidden[id] } })),
   focus: () => set((s) => ({ focusNonce: s.focusNonce + 1 })),
+  goTo: (view) => set((s) => ({ view: { ...view, n: (s.view?.n ?? 0) + 1 } })),
 }))

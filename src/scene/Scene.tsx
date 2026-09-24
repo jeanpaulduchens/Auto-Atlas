@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls } from '@react-three/drei'
-import { Vector3 } from 'three'
+import { Box3, Sphere, Vector3, type PerspectiveCamera } from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { FINAL_DRIVE, GEAR_RATIOS, TAU, sim } from '../sim'
-import { useStore } from '../store'
-import { partBounds } from './registry'
+import { useStore, type CameraView } from '../store'
+import { partBounds, systemBounds } from './registry'
+import { Labels } from './Labels'
 import { Body } from './Body'
 import { Chassis } from './Chassis'
 import { Cooling } from './Cooling'
@@ -54,18 +55,50 @@ function SimDriver() {
   return null
 }
 
-/** Lleva la cámara suavemente hacia la pieza seleccionada (o a la vista general). */
+/**
+ * Lleva la cámara suavemente hacia la pieza seleccionada, el sistema activo,
+ * una vista pedida por un recorrido o la vista general.
+ */
 function CameraRig() {
   const controls = useThree((s) => s.controls) as OrbitControlsImpl | null
   const camera = useThree((s) => s.camera)
   const invalidate = useThree((s) => s.invalidate)
   const nonce = useStore((s) => s.focusNonce)
+  const view = useStore((s) => s.view)
   const goal = useRef<{ target: Vector3; position: Vector3 } | null>(null)
+  const pending = useRef<CameraView | null>(null)
+
+  useEffect(() => {
+    if (!view) return
+    if (view.cam && view.target) goal.current = { target: new Vector3(...view.target), position: new Vector3(...view.cam) }
+    else pending.current = view // se encuadra cuando las piezas dejan de moverse
+  }, [view])
+
+  /** Posición que encuadra las piezas pedidas, mirando desde view.dir. */
+  const frameGoal = (v: CameraView) => {
+    const box = new Box3()
+    for (const id of v.frame ?? []) {
+      const b = partBounds(id)
+      if (b) box.union(b)
+    }
+    if (box.isEmpty()) return null
+    const sphere = box.getBoundingSphere(new Sphere())
+    const cam = camera as PerspectiveCamera
+    const vfov = (cam.fov * Math.PI) / 180
+    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * cam.aspect)
+    const MARGIN = 1.3
+    const dist = (sphere.radius / Math.sin(Math.min(vfov, hfov) / 2)) * MARGIN * (v.zoom ?? 1)
+    // Bajar un poco el objetivo sube las piezas en pantalla y deja libre la tarjeta del recorrido
+    const target = sphere.center.clone()
+    target.y -= sphere.radius * 0.12
+    const dir = new Vector3(...(v.dir ?? [0.5, 0.4, 1])).normalize()
+    return { target, position: target.clone().addScaledVector(dir, dist) }
+  }
 
   useEffect(() => {
     if (nonce === 0 || !controls) return
-    const id = useStore.getState().selected
-    const box = id ? partBounds(id) : null
+    const { selected, activeSystem } = useStore.getState()
+    const box = selected ? partBounds(selected) : activeSystem ? systemBounds(activeSystem) : null
     if (!box) {
       goal.current = { target: HOME.target.clone(), position: HOME.position.clone() }
       return
@@ -88,6 +121,11 @@ function CameraRig() {
   })
 
   useFrame((_, dt) => {
+    if (pending.current && Math.abs(useStore.getState().explode - sim.explode) < 0.01) {
+      goal.current = frameGoal(pending.current)
+      pending.current = null
+    }
+    if (pending.current) invalidate()
     const g = goal.current
     if (!g || !controls) return
     const k = Math.min(1, dt * 4)
@@ -141,6 +179,7 @@ export function Scene() {
       onCreated={(state) => {
         // Solo en desarrollo: permite inspeccionar el renderer desde la consola (window.__atlas)
         if (import.meta.env.DEV) Object.assign(window, { __atlas: state })
+        state.gl.localClippingEnabled = true // planos de corte por material (modo sección)
       }}
     >
       <color attach="background" args={['#0b0e14']} />
@@ -162,6 +201,7 @@ export function Scene() {
       <Exhaust />
       <Chassis />
       <Body />
+      <Labels />
 
       <GroundShadow />
       <Grid
