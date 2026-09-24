@@ -144,6 +144,7 @@ function useLabelLayout() {
  * - con el auto desarmado se ven los sistemas, y al elegir uno, sus piezas.
  */
 export function Labels() {
+  const enabled = useStore((s) => s.labels)
   const exploded = useStore((s) => s.explode >= 0.5)
   const selected = useStore((s) => s.selected)
   const activeSystem = useStore((s) => s.activeSystem)
@@ -155,6 +156,8 @@ export function Labels() {
   useLabelLayout()
 
   const system = selected ? PARTS[selected].system : activeSystem
+
+  if (!enabled) return null
 
   if (!exploded || isolate) {
     if (!selected || hidden[PARTS[selected].system]) return null

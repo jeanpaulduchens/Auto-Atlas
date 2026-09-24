@@ -5,7 +5,7 @@ export function Hud() {
   const hovered = useStore((s) => s.hovered)
   return (
     <div className="hud">
-      {hovered ? <b>{PARTS[hovered].name}</b> : 'Clic en una pieza para ver cómo funciona · Arrastra para girar · Rueda para acercar'}
+      {hovered ? <b>{PARTS[hovered].name}</b> : 'Clic en una pieza para ver cómo funciona · Arrastra para girar · Rueda para acercar · L oculta las etiquetas'}
     </div>
   )
 }

@@ -97,7 +97,7 @@ function ValveCover() {
 function OilPan() {
   const top = CRANK_Y - 0.05
   return (
-    <Part id="carter" explode={[0, -0.35, 0]} cutaway section="shell">
+    <Part id="carter" explode={[0, -0.18, 0]} cutaway section="shell">
       <RoundedBox args={[0.4, 0.12, 0.15]} radius={0.015} position={[1.25, top - 0.055, 0]} material={M.darkSteel} />
       <mesh position={[1.3, top - 0.12, 0]} material={M.steel}>
         <cylinderGeometry args={[0.008, 0.008, 0.012, 6]} />

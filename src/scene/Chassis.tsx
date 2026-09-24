@@ -117,7 +117,7 @@ function RearSuspension() {
 
 function Frame() {
   return (
-    <Part id="chasis" explode={[0, -0.5, 0]}>
+    <Part id="chasis" explode={[0, -0.28, 0]}>
       {[-1, 1].map((s) => (
         <Beam key={s} a={[-2.0, 0.36, s * 0.45]} b={[1.95, 0.36, s * 0.45]} r={0.03} box material={M.darkSteel} />
       ))}
@@ -156,7 +156,7 @@ const FUEL_LINE: [number, number, number][] = [
 function FuelTank() {
   const curve = useMemo(() => curveThrough(FUEL_LINE), [])
   return (
-    <Part id="estanque" explode={[0, -0.35, -0.35]}>
+    <Part id="estanque" explode={[0, -0.2, -0.45]}>
       <RoundedBox args={[0.45, 0.18, 0.34]} radius={0.03} position={[-0.83, 0.35, -0.23]} material={M.fuelTank} />
       <Pipe points={FUEL_LINE} r={0.006} material={M.steel} />
       <FlowDots curve={curve} color="#f472b6" count={30} size={0.008} speed={0.12} />

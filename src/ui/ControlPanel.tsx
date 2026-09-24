@@ -112,8 +112,21 @@ function Tours() {
   )
 }
 
+/** Atajo de teclado: L muestra u oculta las etiquetas. */
+function useLabelsShortcut() {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return
+      if (e.key === 'l' || e.key === 'L') useStore.getState().toggleLabels()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+}
+
 export function ControlPanel() {
   const s = useStore()
+  useLabelsShortcut()
   const collapsed = s.panelCollapsed
   const setCollapsed = (v: boolean) => s.set({ panelCollapsed: v })
   const wheelRpm = s.running && !s.clutch && s.gear > 0 ? s.rpm / GEAR_RATIOS[s.gear] / FINAL_DRIVE : 0
@@ -165,6 +178,17 @@ export function ControlPanel() {
                     {o.label}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="row">
+              <span>Etiquetas</span>
+              <div className="seg" role="group" aria-label="Etiquetas sobre las piezas (tecla L)">
+                <button className={s.labels ? 'on' : ''} onClick={() => !s.labels && s.toggleLabels()}>
+                  Mostrar
+                </button>
+                <button className={s.labels ? '' : 'on'} onClick={() => s.labels && s.toggleLabels()}>
+                  Ocultar
+                </button>
               </div>
             </div>
             <div className="row">

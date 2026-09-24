@@ -91,7 +91,7 @@ function InputShaft() {
 
 function Countershaft() {
   return (
-    <Part id="eje-intermediario" explode={[0, -0.3, 0]}>
+    <Part id="eje-intermediario" explode={[0, -0.18, 0]}>
       <Spinner angle={() => -sim.input} position={[0, GEARBOX_COUNTER_Y, 0]}>
         <mesh position={[0.6, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={M.steel}>
           <cylinderGeometry args={[0.012, 0.012, 0.42, 12]} />
@@ -193,7 +193,7 @@ function Driveshaft() {
     </group>
   )
   return (
-    <Part id="cardan" explode={[0, -0.3, 0]}>
+    <Part id="cardan" explode={[0, -0.2, 0]}>
       <group position={a} quaternion={quat}>
         <Spinner angle={() => sim.output}>
           <mesh position={[len / 2, 0, 0]} rotation={[0, 0, Math.PI / 2]} material={M.steel}>
@@ -240,7 +240,7 @@ function Differential() {
 
 function AxleHousing() {
   return (
-    <Part id="puente-trasero" explode={[0, -0.3, 0]} cutaway section="shell">
+    <Part id="puente-trasero" explode={[0, -0.12, 0]} cutaway section="shell">
       <mesh position={[DIFF_X, WHEEL_Y, 0]} scale={[1, 1, 0.8]} material={M.housing}>
         <sphereGeometry args={[0.13, 32, 24]} />
       </mesh>

@@ -14,6 +14,8 @@ export interface AppState {
   bodyOpacity: number
   interior: Interior
   quality: Quality
+  /** Etiquetas sobre las piezas (se pueden ocultar para solo hacer clic). */
+  labels: boolean
   running: boolean
   rpm: number
   slow: number
@@ -33,6 +35,7 @@ export interface AppState {
   view: (CameraView & { n: number }) | null
   panelCollapsed: boolean
   set: (patch: Partial<AppState>) => void
+  toggleLabels: () => void
   select: (id: string | null, focus?: boolean) => void
   toggleSystem: (id: SystemId) => void
   focus: () => void
@@ -63,6 +66,23 @@ const num = (key: string, fallback: number) => {
 const INTERIORS: Interior[] = ['cerrado', 'translucido', 'seccion']
 const interiorParam = params.get('interior') as Interior | null
 
+/** Preferencia del visitante, recordada en su navegador (puede no estar disponible). */
+const LABELS_KEY = 'auto-atlas:etiquetas'
+function readLabels() {
+  try {
+    return localStorage.getItem(LABELS_KEY) !== 'no'
+  } catch {
+    return true
+  }
+}
+function saveLabels(on: boolean) {
+  try {
+    localStorage.setItem(LABELS_KEY, on ? 'si' : 'no')
+  } catch {
+    // sin almacenamiento: la preferencia dura solo esta visita
+  }
+}
+
 export const noneHidden = () => Object.fromEntries(SYSTEM_ORDER.map((s) => [s, false])) as Record<SystemId, boolean>
 
 export const useStore = create<AppState>((set) => ({
@@ -71,6 +91,7 @@ export const useStore = create<AppState>((set) => ({
   interior: interiorParam && INTERIORS.includes(interiorParam) ? interiorParam : 'translucido',
   // Celulares y tablets (pantalla táctil) parten en Rápida: el post-procesado exige más GPU
   quality: (params.get('calidad') as Quality | null) ?? (window.matchMedia('(pointer: coarse)').matches ? 'rapida' : 'alta'),
+  labels: readLabels(),
   running: params.get('running') !== '0',
   rpm: num('rpm', 900),
   slow: num('slow', 0.05),
@@ -86,6 +107,11 @@ export const useStore = create<AppState>((set) => ({
   view: null,
   panelCollapsed: false,
   set: (patch) => set(patch),
+  toggleLabels: () =>
+    set((s) => {
+      saveLabels(!s.labels)
+      return { labels: !s.labels }
+    }),
   select: (id, focus = false) =>
     set((s) => ({
       selected: id,

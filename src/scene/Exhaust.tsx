@@ -39,7 +39,7 @@ function Manifold() {
 
 function Catalyst() {
   return (
-    <Part id="catalizador" explode={[0, -0.3, 0.35]}>
+    <Part id="catalizador" explode={[0, -0.1, 0.55]}>
       <mesh position={[0.3, 0.2, 0.2]} rotation={[0, 0, Math.PI / 2]} material={M.steel}>
         <cylinderGeometry args={[0.055, 0.055, 0.32, 24]} />
       </mesh>
@@ -55,7 +55,7 @@ function Catalyst() {
 function PipeAndMuffler() {
   const curve = useMemo(() => curveThrough(PIPE), [])
   return (
-    <Part id="silenciador" explode={[0, -0.3, 0.35]} cutaway section="translucent">
+    <Part id="silenciador" explode={[0, -0.1, 0.55]} cutaway section="translucent">
       <Pipe points={PIPE} r={0.022} material={M.darkSteel} />
       <RoundedBox args={[0.42, 0.12, 0.2]} radius={0.04} position={[-1.75, 0.22, 0.3]} material={M.steel} />
       <FlowDots curve={curve} color="#d6d3d1" count={46} size={0.011} speed={0.1} />

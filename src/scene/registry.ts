@@ -1,4 +1,4 @@
-import { Box3, Vector3, type Camera, type Mesh, type Object3D } from 'three'
+import { Box3, Raycaster, Vector3, type Camera, type Mesh, type Object3D } from 'three'
 import { PARTS, type SystemId } from '../data/parts'
 
 /** Grupos 3D montados por cada id de pieza (una pieza puede tener varias instancias, ej. 4 ruedas). */
@@ -48,8 +48,53 @@ export function systemBounds(system: SystemId): Box3 | null {
   return box.isEmpty() ? null : box
 }
 
-const instBox = new Box3()
-const center = new Vector3()
+const DOWN = new Vector3(0, -1, 0)
+const raycaster = new Raycaster()
+const vertex = new Vector3()
+const origin = new Vector3()
+
+/** Ancla de cada instancia, relativa a la posición de su grupo (que solo se traslada al desarmar). */
+const anchors = new WeakMap<Object3D, Vector3>()
+
+/**
+ * Punto sobre la superficie de la pieza donde apoyar su etiqueta: donde un rayo
+ * vertical que baja por el centro de la pieza la toca. Si el rayo no toca nada
+ * (piezas largas o en forma de L, como el tubo de escape), el punto de la pieza
+ * más cercano a su centro.
+ */
+function computeAnchor(root: Object3D) {
+  const box = boundsOf(root, new Box3())
+  if (box.isEmpty()) return null
+  const center = box.getCenter(new Vector3())
+  const meshes: Mesh[] = []
+  root.traverse((o) => {
+    const mesh = o as Mesh
+    if (mesh.isMesh && !mesh.userData.noHighlight) meshes.push(mesh)
+  })
+
+  raycaster.set(origin.set(center.x, box.max.y + 0.05, center.z), DOWN)
+  const hit = raycaster.intersectObjects(meshes, false)[0]
+  const point = new Vector3()
+  if (hit) {
+    point.copy(hit.point)
+  } else {
+    let best = Infinity
+    for (const mesh of meshes) {
+      const pos = mesh.geometry.attributes.position
+      for (let i = 0; i < pos.count; i++) {
+        vertex.fromBufferAttribute(pos, i).applyMatrix4(mesh.matrixWorld)
+        const d = vertex.distanceToSquared(center)
+        if (d < best) {
+          best = d
+          point.copy(vertex)
+        }
+      }
+    }
+  }
+  return point.sub(root.getWorldPosition(new Vector3()))
+}
+
+const worldAnchor = new Vector3()
 
 /**
  * Punto donde anclar la etiqueta de una pieza: sobre la instancia visible más
@@ -59,13 +104,17 @@ export function partAnchor(id: string, camera: Camera, out: Vector3) {
   let best = Infinity
   registry.get(id)?.forEach((o) => {
     if (!isShown(o)) return
-    boundsOf(o, instBox.makeEmpty())
-    if (instBox.isEmpty()) return
-    instBox.getCenter(center)
-    const d = center.distanceToSquared(camera.position)
+    let local = anchors.get(o)
+    if (!local) {
+      const computed = computeAnchor(o)
+      if (!computed) return
+      anchors.set(o, (local = computed))
+    }
+    o.getWorldPosition(worldAnchor).add(local)
+    const d = worldAnchor.distanceToSquared(camera.position)
     if (d < best) {
       best = d
-      out.set(center.x, instBox.max.y, center.z)
+      out.copy(worldAnchor)
     }
   })
   return best < Infinity

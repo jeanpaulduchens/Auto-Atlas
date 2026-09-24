@@ -16,6 +16,8 @@ npm run dev                            # abre http://localhost:5173
   la caja por la mitad, con rayado técnico en las caras cortadas.
 - **Desarmar**: separa las piezas y muestra una etiqueta por sistema; al tocar un sistema aparecen
   las etiquetas de sus piezas.
+- **Etiquetas** (panel → Vista, o tecla `L`): se pueden ocultar para solo hacer clic en las piezas.
+  La preferencia queda guardada en el navegador.
 - **Recorridos**: secuencias de vistas con explicación (← → para avanzar, Esc para salir). Se definen en
   `src/data/tours.ts`: cada paso indica qué piezas encuadrar y desde qué dirección, y la cámara calcula
   la distancia sola, así que siguen funcionando si cambian los modelos.
