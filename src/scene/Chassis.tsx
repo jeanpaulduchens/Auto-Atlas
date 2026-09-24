@@ -42,7 +42,7 @@ function Wheels() {
       {WHEELS.map(({ x, s }) => (
         <Part key={`${x}${s}`} id="ruedas" explode={[0, 0, s * 0.65]}>
           <Spinner angle={() => -sim.wheel} axis="z" position={[x, WHEEL_Y, s * TRACK_Z]}>
-            <mesh geometry={tire} material={M.rubber} />
+            <mesh geometry={tire} material={M.tire} />
             <mesh rotation={[Math.PI / 2, 0, 0]} material={M.aluminum}>
               <cylinderGeometry args={[0.2, 0.2, 0.19, 40, 1, true]} />
             </mesh>

@@ -1,12 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { ContactShadows, Environment, Grid, Lightformer, OrbitControls } from '@react-three/drei'
-import { Box3, Sphere, Vector3, type PerspectiveCamera } from 'three'
+import { ContactShadows, OrbitControls } from '@react-three/drei'
+import { Box3, NeutralToneMapping, Sphere, Vector3, type PerspectiveCamera } from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { FINAL_DRIVE, GEAR_RATIOS, TAU, sim } from '../sim'
 import { useStore, type CameraView } from '../store'
 import { partBounds, systemBounds } from './registry'
 import { Labels } from './Labels'
+import { BACKGROUND, StudioFloor, StudioLights } from './Studio'
+
+// El post-procesado va en un archivo aparte que solo se descarga en calidad alta
+const Effects = lazy(() => import('./Effects'))
 import { Body } from './Body'
 import { Chassis } from './Chassis'
 import { Cooling } from './Cooling'
@@ -157,8 +161,10 @@ function GroundShadow() {
     <ContactShadows
       key={live ? 'live' : `fija-${version}`}
       frames={live ? Infinity : 1}
-      position={[0, 0.002, 0]}
-      opacity={0.6}
+      // Bajo cero a propósito: drei difumina con un plano en y = 0 que su cámara (mirando hacia arriba)
+      // debe tener delante. Por encima de 0 el difuminado no se dibuja y la sombra queda vacía.
+      position={[0, -0.002, 0]}
+      opacity={0.75}
       scale={9}
       blur={2.5}
       far={2}
@@ -169,6 +175,7 @@ function GroundShadow() {
 
 export function Scene() {
   const select = useStore((s) => s.select)
+  const highQuality = useStore((s) => s.quality === 'alta')
   const running = useStore((s) => s.running)
   return (
     <Canvas
@@ -180,19 +187,12 @@ export function Scene() {
         // Solo en desarrollo: permite inspeccionar el renderer desde la consola (window.__atlas)
         if (import.meta.env.DEV) Object.assign(window, { __atlas: state })
         state.gl.localClippingEnabled = true // planos de corte por material (modo sección)
+        state.gl.toneMapping = NeutralToneMapping // en calidad alta lo reemplaza el del post-procesado
       }}
     >
-      <color attach="background" args={['#0b0e14']} />
-      <fog attach="fog" args={['#0b0e14', 14, 32]} />
-      <hemisphereLight args={['#e0f2fe', '#1e293b', 0.7]} />
-      <directionalLight position={[5, 8, 4]} intensity={2} />
-      <directionalLight position={[-5, 4, -4]} intensity={0.7} />
-      <Environment resolution={256}>
-        <Lightformer form="rect" intensity={2.5} position={[0, 6, 0]} rotation-x={Math.PI / 2} scale={[12, 6, 1]} />
-        <Lightformer form="rect" intensity={1.2} position={[6, 2, 0]} rotation-y={-Math.PI / 2} scale={[8, 2, 1]} />
-        <Lightformer form="rect" intensity={1.2} position={[-6, 2, 0]} rotation-y={Math.PI / 2} scale={[8, 2, 1]} />
-        <Lightformer form="ring" color="#bae6fd" intensity={1.5} position={[0, 3, 6]} scale={3} />
-      </Environment>
+      <color attach="background" args={[BACKGROUND]} />
+      <fog attach="fog" args={[BACKGROUND, 9, 26]} />
+      <StudioLights />
 
       <SimDriver />
       <Engine />
@@ -204,17 +204,14 @@ export function Scene() {
       <Labels />
 
       <GroundShadow />
-      <Grid
-        position={[0, 0, 0]}
-        cellSize={0.25}
-        sectionSize={1}
-        cellColor="#1e293b"
-        sectionColor="#334155"
-        fadeDistance={16}
-        infiniteGrid
-      />
+      <StudioFloor />
       <OrbitControls makeDefault target={START.target} enableDamping maxPolarAngle={Math.PI * 0.49} minDistance={0.3} maxDistance={14} />
       <CameraRig />
+      {highQuality && (
+        <Suspense fallback={null}>
+          <Effects />
+        </Suspense>
+      )}
     </Canvas>
   )
 }

@@ -6,10 +6,14 @@ export type V3 = [number, number, number]
 /** Cómo se muestran las carcasas (bloque, culata, caja…): cerradas, translúcidas o cortadas por la mitad. */
 export type Interior = 'cerrado' | 'translucido' | 'seccion'
 
+/** Alta: post-procesado (oclusión ambiental, brillo, tone mapping de cine). Rápida: para equipos modestos. */
+export type Quality = 'alta' | 'rapida'
+
 export interface AppState {
   explode: number
   bodyOpacity: number
   interior: Interior
+  quality: Quality
   running: boolean
   rpm: number
   slow: number
@@ -65,6 +69,8 @@ export const useStore = create<AppState>((set) => ({
   explode: num('explode', 0),
   bodyOpacity: num('body', 1),
   interior: interiorParam && INTERIORS.includes(interiorParam) ? interiorParam : 'translucido',
+  // Celulares y tablets (pantalla táctil) parten en Rápida: el post-procesado exige más GPU
+  quality: (params.get('calidad') as Quality | null) ?? (window.matchMedia('(pointer: coarse)').matches ? 'rapida' : 'alta'),
   running: params.get('running') !== '0',
   rpm: num('rpm', 900),
   slow: num('slow', 0.05),

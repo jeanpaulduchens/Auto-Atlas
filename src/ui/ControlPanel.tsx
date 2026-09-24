@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PARTS, SYSTEMS, SYSTEM_ORDER, type SystemId } from '../data/parts'
 import { CYLINDERS, FINAL_DRIVE, GEAR_RATIOS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
-import { useStore, type Interior } from '../store'
+import { useStore, type Interior, type Quality } from '../store'
 import { TOURS } from '../data/tours'
 import { endTour, goToStep } from '../tours'
 
@@ -73,6 +73,11 @@ function SystemRow({ id }: { id: SystemId }) {
     </div>
   )
 }
+
+const QUALITY: { value: Quality; label: string }[] = [
+  { value: 'alta', label: 'Alta' },
+  { value: 'rapida', label: 'Rápida' },
+]
 
 const INTERIOR: { value: Interior; label: string }[] = [
   { value: 'cerrado', label: 'Cerrado' },
@@ -157,6 +162,16 @@ export function ControlPanel() {
               <div className="seg" role="group" aria-label="Cómo se ven el motor, la caja y la carrocería por dentro">
                 {INTERIOR.map((o) => (
                   <button key={o.value} className={s.interior === o.value ? 'on' : ''} onClick={() => s.set({ interior: o.value })}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="row">
+              <span>Calidad</span>
+              <div className="seg" role="group" aria-label="Calidad de imagen">
+                {QUALITY.map((o) => (
+                  <button key={o.value} className={s.quality === o.value ? 'on' : ''} onClick={() => s.set({ quality: o.value })}>
                     {o.label}
                   </button>
                 ))}

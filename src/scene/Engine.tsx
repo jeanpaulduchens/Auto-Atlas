@@ -175,7 +175,8 @@ function Pistons() {
       const p = cyc / Math.PI - k // avance dentro del tiempo (0..1)
       const mat = g.material as MeshBasicMaterial
       if (k === 2) {
-        mat.color.copy(FLAME).lerp(GAS_COLORS[2], Math.min(1, p * 2))
+        // Al inicio de la explosión la llama emite más que el blanco, así brilla
+        mat.color.copy(FLAME).lerp(GAS_COLORS[2], Math.min(1, p * 2)).multiplyScalar(1 + 2.5 * (1 - p))
         mat.opacity = 0.85 * (1 - p) + 0.15
       } else {
         mat.color.copy(GAS_COLORS[k])
@@ -347,7 +348,8 @@ function SparkPlugs() {
           </mesh>
           <mesh ref={(el) => void (sparks.current[i] = el)} position={[0, DECK_Y + 0.006, 0]} userData={{ noHighlight: true }}>
             <sphereGeometry args={[0.014, 12, 12]} />
-            <meshBasicMaterial color="#fef08a" toneMapped={false} />
+            {/* Más blanco que el blanco (>1): el post-procesado la hace destellar */}
+            <meshBasicMaterial color={[5, 4.2, 1.6]} toneMapped={false} />
           </mesh>
         </group>
       ))}

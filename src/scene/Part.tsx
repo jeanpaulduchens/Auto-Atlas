@@ -21,14 +21,15 @@ const GHOST_OPACITY = 0.06
  */
 export type SectionStyle = 'solid' | 'shell'
 
+// Se inyecta antes del tone mapping, así que los colores van en espacio lineal.
 const CAP_GLSL: Record<SectionStyle, string> = {
   solid: /* glsl */ `
     if (!gl_FrontFacing) {
       float stripe = step(0.5, fract((gl_FragCoord.x + gl_FragCoord.y) / 9.0));
-      gl_FragColor = vec4(mix(vec3(0.55, 0.14, 0.07), vec3(0.82, 0.29, 0.12), stripe), 1.0);
+      gl_FragColor = vec4(mix(vec3(0.26, 0.018, 0.006), vec3(0.64, 0.07, 0.013), stripe), 1.0);
     }`,
   shell: /* glsl */ `
-    if (!gl_FrontFacing) gl_FragColor = vec4(diffuseColor.rgb * 0.22 + 0.015, 1.0);`,
+    if (!gl_FrontFacing) gl_FragColor = vec4(diffuseColor.rgb * 0.05, 1.0);`,
 }
 
 interface OwnedMaterial {
@@ -48,8 +49,8 @@ function ownMaterial(mesh: Mesh, style: SectionStyle): (MeshStandardMaterial & O
     const clone = mesh.material.clone() as MeshStandardMaterial
     clone.onBeforeCompile = (shader) => {
       shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <dithering_fragment>',
-        `#include <dithering_fragment>\n${CAP_GLSL[style]}`,
+        '#include <tonemapping_fragment>',
+        `${CAP_GLSL[style]}\n#include <tonemapping_fragment>`,
       )
     }
     clone.customProgramCacheKey = () => `corte-${style}`

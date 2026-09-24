@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { ExtrudeGeometry, Shape } from 'three'
+import { ExtrudeGeometry, Shape, type BufferGeometry } from 'three'
+import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useStore } from '../store'
 import { Part } from './Part'
 import { M } from './materials'
@@ -9,8 +10,20 @@ type P2 = [number, number]
 const ARCH_R = 0.42
 const SILL_Y = 0.3
 
+/**
+ * Une vértices y recalcula normales: la luz corre continua por los biseles en
+ * vez de marcar cada faceta (se notaba en los reflejos de la pintura).
+ */
+function smooth(geo: BufferGeometry) {
+  geo.deleteAttribute('normal')
+  geo.deleteAttribute('uv')
+  const merged = mergeVertices(geo, 1e-4)
+  merged.computeVertexNormals()
+  return merged
+}
+
 /** Extruye un perfil lateral (x, y) a lo ancho del auto, centrado en z=0. */
-function extrudeProfile(build: (s: Shape) => void, width: number, bevel: number) {
+function extrudeProfile(build: (s: Shape) => void, width: number, bevel: number, smoothed = false) {
   const shape = new Shape()
   build(shape)
   const geo = new ExtrudeGeometry(shape, {
@@ -18,11 +31,11 @@ function extrudeProfile(build: (s: Shape) => void, width: number, bevel: number)
     bevelEnabled: bevel > 0,
     bevelThickness: bevel,
     bevelSize: bevel,
-    bevelSegments: 4,
-    curveSegments: 24,
+    bevelSegments: 8,
+    curveSegments: 32,
   })
   geo.translate(0, 0, -(width - 2 * bevel) / 2)
-  return geo
+  return smoothed ? smooth(geo) : geo
 }
 
 function polygon(pts: P2[]) {
@@ -101,8 +114,8 @@ function CarBody() {
   const opacity = useStore((s) => s.bodyOpacity)
   const geos = useMemo(
     () => ({
-      lower: extrudeProfile(lowerBody, 1.76, 0.07),
-      cabin: extrudeProfile(cabin, 1.46, 0.05),
+      lower: extrudeProfile(lowerBody, 1.76, 0.07, true),
+      cabin: extrudeProfile(cabin, 1.46, 0.05, true),
       frontWin: extrudeProfile(polygon(FRONT_WINDOW), 1.49, 0),
       rearWin: extrudeProfile(polygon(REAR_WINDOW), 1.49, 0),
     }),

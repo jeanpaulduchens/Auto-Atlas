@@ -19,7 +19,9 @@ npm run dev                            # abre http://localhost:5173
 - **Recorridos**: secuencias de vistas con explicación (← → para avanzar, Esc para salir). Se definen en
   `src/data/tours.ts`: cada paso indica qué piezas encuadrar y desde qué dirección, y la cámara calcula
   la distancia sola, así que siguen funcionando si cambian los modelos.
-- **Enlaces a una vista**: `?interior=seccion&explode=1&select=ciguenal` o `?tour=ciclo&step=3`.
+- **Calidad** (panel → Vista): *Alta* agrega oclusión ambiental, brillo en luces y explosión, y tone
+  mapping Neutral; *Rápida* lo desactiva para equipos modestos (es la inicial en pantallas táctiles).
+- **Enlaces a una vista**: `?interior=seccion&explode=1&select=ciguenal`, `?tour=ciclo&step=3` o `?calidad=rapida`.
 
 ## Stack
 
@@ -39,6 +41,8 @@ src/
   scene/
     Part.tsx         Envoltorio de cada pieza: selección, resaltado, transparencia, corte, explosión
     Labels.tsx       Etiquetas sobre las piezas, acomodadas para no taparse
+    Studio.tsx       Iluminación de estudio, piso y post-procesado
+    textures.ts      Texturas de superficie generadas por código (fundición, cepillado, rodadura)
     layout.ts        Cotas del auto (dónde va cada cosa, en metros)
     helpers.tsx      Engranajes, resortes, correas, tubos, partículas de flujo
     Engine.tsx       Motor 4 cilindros DOHC 16v
