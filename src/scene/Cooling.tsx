@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { BoxGeometry } from 'three'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { sim } from '../sim'
 import { Part, type V3 } from './Part'
 import { FlowDots, Pipe, Spinner, curveThrough } from './helpers'
@@ -20,15 +22,23 @@ const LOWER_HOSE: V3[] = [
   [1.5, 0.55, -0.16],
 ]
 
+const FINS = 36
+
+/** Las aletas se unen en una sola geometría: una llamada de dibujo en vez de 36. */
+function finsGeometry() {
+  const pitch = (2 * RAD.z) / FINS
+  return mergeGeometries(
+    Array.from({ length: FINS }, (_, k) =>
+      new BoxGeometry(0.035, RAD.y1 - RAD.y0, 0.004).translate(RAD_X, (RAD.y0 + RAD.y1) / 2, -RAD.z + (k + 0.5) * pitch),
+    ),
+  )
+}
+
 function Radiator() {
-  const fins = 36
+  const fins = useMemo(finsGeometry, [])
   return (
     <Part id="radiador" explode={[0.7, 0.25, 0]}>
-      {Array.from({ length: fins }, (_, k) => (
-        <mesh key={k} position={[RAD_X, (RAD.y0 + RAD.y1) / 2, -RAD.z + (k + 0.5) * ((2 * RAD.z) / fins)]} material={M.radiatorFin}>
-          <boxGeometry args={[0.035, RAD.y1 - RAD.y0, 0.004]} />
-        </mesh>
-      ))}
+      <mesh geometry={fins} material={M.radiatorFin} />
       {[RAD.y0 - 0.02, RAD.y1 + 0.02].map((y) => (
         <mesh key={y} position={[RAD_X, y, 0]} material={M.black}>
           <boxGeometry args={[0.05, 0.04, 2 * RAD.z + 0.04]} />

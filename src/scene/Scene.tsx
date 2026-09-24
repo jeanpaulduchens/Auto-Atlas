@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, Environment, Grid, Lightformer, OrbitControls } from '@react-three/drei'
 import { Vector3 } from 'three'
@@ -22,12 +22,25 @@ function vecParam(key: string, fallback: Vector3) {
 }
 const START = { target: vecParam('target', HOME.target), position: vecParam('cam', HOME.position) }
 
-/** Avanza la simulación mecánica y la animación de explosión. */
+/**
+ * Avanza la simulación mecánica y la animación de explosión.
+ * Con el motor apagado el canvas dibuja solo a pedido: cualquier cambio del
+ * store o una animación en curso pide el siguiente frame con invalidate().
+ */
 function SimDriver() {
+  const invalidate = useThree((s) => s.invalidate)
+  useEffect(() => useStore.subscribe(() => invalidate()), [invalidate])
+
   useFrame((_, rawDt) => {
     const dt = Math.min(rawDt, 0.05)
     const s = useStore.getState()
-    sim.explode += (s.explode - sim.explode) * Math.min(1, dt * 5)
+    const diff = s.explode - sim.explode
+    if (Math.abs(diff) > 1e-4) {
+      sim.explode += diff * Math.min(1, dt * 5)
+      invalidate()
+    } else {
+      sim.explode = s.explode
+    }
     if (!s.running) return
     const dCrank = (s.rpm / 60) * TAU * s.slow * dt
     const dInput = s.clutch ? 0 : dCrank
@@ -45,6 +58,7 @@ function SimDriver() {
 function CameraRig() {
   const controls = useThree((s) => s.controls) as OrbitControlsImpl | null
   const camera = useThree((s) => s.camera)
+  const invalidate = useThree((s) => s.invalidate)
   const nonce = useStore((s) => s.focusNonce)
   const goal = useRef<{ target: Vector3; position: Vector3 } | null>(null)
 
@@ -69,10 +83,15 @@ function CameraRig() {
     return () => controls.removeEventListener('start', cancel)
   }, [controls])
 
+  useEffect(() => {
+    if (goal.current) invalidate()
+  })
+
   useFrame((_, dt) => {
     const g = goal.current
     if (!g || !controls) return
     const k = Math.min(1, dt * 4)
+    invalidate()
     controls.target.lerp(g.target, k)
     camera.position.lerp(g.position, k)
     if (camera.position.distanceTo(g.position) < 0.005) goal.current = null
@@ -80,13 +99,49 @@ function CameraRig() {
   return null
 }
 
+/**
+ * Sombra de contacto. Volver a dibujarla cuesta un render completo del auto,
+ * así que se actualiza en vivo solo mientras las piezas se desplazan y, al
+ * detenerse (o al ocultar un sistema), se dibuja una vez y queda fija.
+ */
+function GroundShadow() {
+  const [live, setLive] = useState(false)
+  const [version, setVersion] = useState(0)
+  const hidden = useStore((s) => s.hidden)
+  useEffect(() => setVersion((v) => v + 1), [hidden])
+  useFrame(() => {
+    const moving = Math.abs(useStore.getState().explode - sim.explode) > 1e-3
+    if (moving === live) return
+    setLive(moving)
+    if (!moving) setVersion((v) => v + 1)
+  })
+  return (
+    <ContactShadows
+      key={live ? 'live' : `fija-${version}`}
+      frames={live ? Infinity : 1}
+      position={[0, 0.002, 0]}
+      opacity={0.6}
+      scale={9}
+      blur={2.5}
+      far={2}
+      resolution={512}
+    />
+  )
+}
+
 export function Scene() {
   const select = useStore((s) => s.select)
+  const running = useStore((s) => s.running)
   return (
     <Canvas
+      frameloop={running ? 'always' : 'demand'}
       camera={{ position: START.position.toArray(), fov: 38, near: 0.05, far: 100 }}
       dpr={[1, 2]}
       onPointerMissed={(e) => e.type === 'click' && select(null)}
+      onCreated={(state) => {
+        // Solo en desarrollo: permite inspeccionar el renderer desde la consola (window.__atlas)
+        if (import.meta.env.DEV) Object.assign(window, { __atlas: state })
+      }}
     >
       <color attach="background" args={['#0b0e14']} />
       <fog attach="fog" args={['#0b0e14', 14, 32]} />
@@ -108,7 +163,7 @@ export function Scene() {
       <Chassis />
       <Body />
 
-      <ContactShadows position={[0, 0.002, 0]} opacity={0.6} scale={9} blur={2.5} far={2} resolution={512} />
+      <GroundShadow />
       <Grid
         position={[0, 0, 0]}
         cellSize={0.25}

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { RoundedBox } from '@react-three/drei'
-import { LatheGeometry, Vector2 } from 'three'
+import { BoxGeometry, LatheGeometry, Vector2 } from 'three'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { sim } from '../sim'
 import { Part } from './Part'
 import { Beam, Coil, FlowDots, Pipe, Spinner, curveThrough } from './helpers'
@@ -26,8 +27,16 @@ function tireGeometry() {
   return geo
 }
 
+/** Rayos de la llanta en una sola geometría; s = lado (−1 izquierda, 1 derecha). */
+function spokesGeometry(s: number) {
+  return mergeGeometries(
+    Array.from({ length: 5 }, (_, k) => new BoxGeometry(0.035, 0.15, 0.02).translate(0, 0.125, s * 0.06).rotateZ((k / 5) * Math.PI * 2)),
+  )
+}
+
 function Wheels() {
   const tire = useMemo(tireGeometry, [])
+  const spokes = useMemo(() => ({ left: spokesGeometry(-1), right: spokesGeometry(1) }), [])
   return (
     <>
       {WHEELS.map(({ x, s }) => (
@@ -40,13 +49,7 @@ function Wheels() {
             <mesh position={[0, 0, s * 0.06]} rotation={[Math.PI / 2, 0, 0]} material={M.aluminum}>
               <cylinderGeometry args={[0.055, 0.055, 0.03, 24]} />
             </mesh>
-            {Array.from({ length: 5 }, (_, k) => (
-              <group key={k} rotation={[0, 0, (k / 5) * Math.PI * 2]}>
-                <mesh position={[0, 0.125, s * 0.06]} material={M.aluminum}>
-                  <boxGeometry args={[0.035, 0.15, 0.02]} />
-                </mesh>
-              </group>
-            ))}
+            <mesh geometry={s > 0 ? spokes.right : spokes.left} material={M.aluminum} />
           </Spinner>
         </Part>
       ))}

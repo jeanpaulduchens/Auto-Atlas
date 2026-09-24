@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Quaternion, Vector3, type Group } from 'three'
+import { BoxGeometry, Quaternion, Vector3, type Group } from 'three'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { GEAR_RATIOS, sim } from '../sim'
 import { useStore } from '../store'
 import { Part, type V3 } from './Part'
@@ -29,7 +30,15 @@ function gearPair(n: number) {
 
 const MARCHAS = [1, 2, 3, 4, 5]
 
+/** Dedos del resorte de diafragma, unidos en una sola geometría. */
+function diaphragmGeometry() {
+  return mergeGeometries(
+    Array.from({ length: 12 }, (_, k) => new BoxGeometry(0.004, 0.07, 0.014).rotateX((k / 12) * Math.PI * 2).translate(-0.004, 0, 0)),
+  )
+}
+
 function Clutch() {
+  const diaphragm = useMemo(diaphragmGeometry, [])
   return (
     <Part id="embrague" explode={[0, 0, -0.45]}>
       {/* Plato de presión: gira siempre con el motor */}
@@ -37,12 +46,7 @@ function Clutch() {
         <mesh rotation={[0, 0, Math.PI / 2]} material={M.steel}>
           <cylinderGeometry args={[0.12, 0.12, 0.016, 32, 1, true]} />
         </mesh>
-        {Array.from({ length: 12 }, (_, k) => (
-          <mesh key={k} rotation={[(k / 12) * Math.PI * 2, 0, 0]} position={[-0.004, 0, 0]}>
-            <boxGeometry args={[0.004, 0.07, 0.014]} />
-            <meshStandardMaterial color="#a1a1aa" metalness={0.9} roughness={0.3} />
-          </mesh>
-        ))}
+        <mesh geometry={diaphragm} material={M.steel} />
       </Spinner>
       {/* Disco de fricción: gira con el eje primario (se detiene con el embrague pisado) */}
       <Spinner angle={() => sim.input} position={[0.992, CRANK_Y, 0]}>
