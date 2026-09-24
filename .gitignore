@@ -1,0 +1,25 @@
+# Dependencias y build
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Variables de entorno (claves, tokens)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Archivos de trabajo 3D (las fuentes .blend van aparte; al repo solo los .glb finales)
+*.blend1
+*.blend2

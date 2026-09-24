@@ -1,0 +1,678 @@
+<title>Auto Atlas · Piezas 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f3f5f7;
+    --surface: #ffffff;
+    --ink: #15202b;
+    --muted: #5b6875;
+    --line: #d9dee4;
+    --accent: #1d5fae;
+    --accent-soft: #e3edf8;
+    --rot: #1d5fae;
+    --rot-bg: #e3edf8;
+    --slide: #8a4b00;
+    --slide-bg: #fbeedd;
+    --static: #5b6875;
+    --static-bg: #eaedf0;
+    --cut: #6b3fa0;
+    --cut-bg: #efe7f8;
+    --display: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+    --body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0f141a;
+      --surface: #161d25;
+      --ink: #e3e8ee;
+      --muted: #93a1b0;
+      --line: #27313c;
+      --accent: #7aaeea;
+      --accent-soft: #1a2a3d;
+      --rot: #8dbbf0;
+      --rot-bg: #1a2a3d;
+      --slide: #f0b36a;
+      --slide-bg: #34260f;
+      --static: #a3afbc;
+      --static-bg: #232c36;
+      --cut: #c3a2ee;
+      --cut-bg: #2a2138;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0f141a;
+    --surface: #161d25;
+    --ink: #e3e8ee;
+    --muted: #93a1b0;
+    --line: #27313c;
+    --accent: #7aaeea;
+    --accent-soft: #1a2a3d;
+    --rot: #8dbbf0;
+    --rot-bg: #1a2a3d;
+    --slide: #f0b36a;
+    --slide-bg: #34260f;
+    --static: #a3afbc;
+    --static-bg: #232c36;
+    --cut: #c3a2ee;
+    --cut-bg: #2a2138;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 40px 72px;
+    display: grid;
+    gap: 48px;
+  }
+  h1, h2, h3 {
+    font-family: var(--display);
+    font-stretch: 85%;
+    text-wrap: balance;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 750; line-height: 1.05; }
+  h2 { font-size: 24px; font-weight: 700; }
+  h3 { font-size: 18px; font-weight: 700; }
+  p { margin: 0; max-width: 68ch; }
+  code, .mono { font-family: var(--mono); font-size: 0.88em; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* Cabecera */
+  header.intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  .intro-text { display: grid; gap: 14px; }
+  .lede { font-size: 17px; color: var(--ink); }
+  .axes {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+  }
+  .axes svg { width: 100%; height: auto; display: block; }
+  .axes .cap { font-size: 13px; color: var(--muted); }
+
+  /* Reglas */
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .rule {
+    background: var(--surface);
+    padding: 18px;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .rule h3 { font-size: 16px; }
+  .rule p { font-size: 14px; color: var(--muted); }
+  .rule p b { color: var(--ink); font-weight: 600; }
+
+  section { display: grid; gap: 18px; }
+  .section-head { display: grid; gap: 6px; }
+  .section-head p { color: var(--muted); }
+
+  /* Fases */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    counter-reset: fase;
+  }
+  .phase {
+    border-top: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 14px 16px 16px;
+    border-radius: 0 0 8px 8px;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .phase .eyebrow { color: var(--accent); }
+  .phase p { font-size: 14px; color: var(--muted); }
+
+  /* Leyenda y chips */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); align-items: center; }
+  .legend span { display: inline-flex; gap: 6px; align-items: center; }
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .chip.rot { color: var(--rot); background: var(--rot-bg); }
+  .chip.slide { color: var(--slide); background: var(--slide-bg); }
+  .chip.static { color: var(--static); background: var(--static-bg); }
+  .chip.cut { color: var(--cut); background: var(--cut-bg); }
+
+  /* Navegación de sistemas */
+  nav.systems {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 2;
+    background: var(--bg);
+    padding-block: 10px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  nav.systems a {
+    font-size: 13px;
+    text-decoration: none;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 3px 10px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  nav.systems a:hover { border-color: var(--accent); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+
+  /* Tablas */
+  .system { display: grid; gap: 10px; scroll-margin-top: 64px; }
+  .system-title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .system-title .count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: none; }
+  th {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--bg);
+  }
+  td.id code { color: var(--accent); font-weight: 500; }
+  td.name { font-weight: 600; min-width: 150px; }
+  td.qty { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  td.motion { white-space: nowrap; }
+  td.motion .chip + .chip { margin-left: 4px; }
+  td .pos { font-family: var(--mono); font-size: 12px; color: var(--muted); display: block; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  td ul { margin: 0; padding-left: 16px; }
+  td li + li { margin-top: 3px; }
+  col.c-id { width: 16%; } col.c-name { width: 15%; } col.c-qty { width: 5%; }
+  col.c-motion { width: 11%; } col.c-sep { width: 28%; } col.c-pivot { width: 25%; }
+
+  /* Cotas */
+  .dims {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .dim { background: var(--surface); padding: 12px 14px; display: grid; gap: 2px; }
+  .dim .k { font-size: 12.5px; color: var(--muted); }
+  .dim .v { font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+
+  .checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-width: 76ch; }
+  .checklist li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; }
+  .checklist li::before {
+    content: '';
+    width: 14px; height: 14px;
+    margin-top: 4px;
+    border: 1.5px solid var(--muted);
+    border-radius: 3px;
+  }
+
+  footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+  @media (max-width: 760px) {
+    header.intro { grid-template-columns: 1fr; }
+    .dims { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .wrap { gap: 40px; padding-block: 28px 56px; padding-inline: 16px; }
+  }
+
+  header.intro.solo { grid-template-columns: 1fr; }
+  .quick { columns: 3 260px; column-gap: 28px; }
+  .qsys { break-inside: avoid; margin: 0 0 22px; display: grid; gap: 6px; }
+  .qsys h3 { display: flex; align-items: center; gap: 8px; font-size: 17px; }
+  .qsys ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+  .qsys li { display: flex; flex-wrap: wrap; gap: 0 8px; align-items: baseline; font-size: 14.5px; }
+  .qsys .q { font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .qsys .sep { font-size: 13px; color: var(--slide); }
+  .rules-short { margin: 0; padding-left: 18px; display: grid; gap: 6px; max-width: 72ch; }
+  details.tech { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  details.tech > summary {
+    cursor: pointer; list-style: none; padding: 18px 20px; display: grid; gap: 2px;
+  }
+  details.tech > summary::-webkit-details-marker { display: none; }
+  details.tech > summary .sum-title { font-family: var(--display); font-stretch: 85%; font-weight: 700; font-size: 20px; }
+  details.tech > summary .sum-title::before { content: '▸'; display: inline-block; width: 1.1em; color: var(--accent); transition: transform .15s; }
+  details.tech[open] > summary .sum-title::before { transform: rotate(90deg); }
+  details.tech > summary .sum-sub { color: var(--muted); font-size: 14px; padding-left: 1.3em; }
+  details.tech > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
+  .tech-body { padding: 4px 20px 24px; display: grid; gap: 40px; border-top: 1px solid var(--line); padding-top: 24px; }
+  .tech-top { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .tech-body nav.systems { background: var(--surface); }
+  @media (max-width: 760px) { .tech-top { grid-template-columns: 1fr; } .tech-body { padding-inline: 14px; } }
+  @media (prefers-reduced-motion: reduce) { details.tech > summary .sum-title::before { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="intro solo">
+    <div class="intro-text">
+      <span class="eyebrow">Auto Atlas · Encargo de modelado</span>
+      <h1>Piezas 3D del auto de referencia</h1>
+      <p class="lede">Para separar el modelo existente del auto y del motor en piezas animables. Se conservan las medidas del modelo; la app se ajusta a ellas.</p>
+    </div>
+
+  </header>
+
+  <section aria-labelledby="lista">
+    <div class="section-head">
+      <h2 id="lista">Piezas a separar</h2>
+    </div>
+    <div class="quick" id="quick"></div>
+  </section>
+
+  <section aria-labelledby="reglas">
+    <div class="section-head">
+      <h2 id="reglas">Reglas</h2>
+    </div>
+    <ul class="rules-short">
+      <li><b>.glb</b> en <b>metros</b>, cada pieza sin mover de su posición en el modelo. Puede ser un solo archivo con los objetos nombrados como en la lista.</li>
+      <li>Ejes: <b>+X adelante, +Y arriba</b> (en Blender: frente +X, arriba +Z).</li>
+      <li>Lo marcado <b>aparte</b> va como objeto separado: son las partes que se animan. Si el modelo no tiene alguna pieza, se omite.</li>
+      <li>Lo que gira lleva el <b>origen sobre su eje de giro</b>.</li>
+    </ul>
+  </section>
+
+  <details class="tech">
+    <summary>
+      <span class="sum-title">Ficha técnica</span>
+      <span class="sum-sub">Pivotes, materiales y polígonos. Las coordenadas son del montaje provisorio de la app: sirven de referencia, no hay que seguirlas.</span>
+    </summary>
+    <div class="tech-body">
+      <section aria-labelledby="ejes">
+        <div class="section-head"><h2 id="ejes">Ejes y requisitos</h2></div>
+        <div class="tech-top">
+    <figure class="axes" aria-label="Sistema de ejes del auto">
+      <svg viewBox="0 0 280 170" role="img" aria-labelledby="ax-t">
+        <title id="ax-t">Ejes: X hacia adelante, Y hacia arriba, Z hacia la derecha del conductor</title>
+        <path d="M34 128 L70 104 L236 104 L252 116 L252 128 Z" fill="none" stroke="var(--line)" stroke-width="2" />
+        <path d="M92 104 L118 80 L184 80 L206 104" fill="none" stroke="var(--line)" stroke-width="2" />
+        <circle cx="86" cy="130" r="14" fill="var(--surface)" stroke="var(--muted)" stroke-width="2" />
+        <circle cx="214" cy="130" r="14" fill="var(--surface)" stroke="var(--muted)" stroke-width="2" />
+        <g stroke-width="2.5" fill="none">
+          <line x1="150" y1="130" x2="226" y2="130" stroke="var(--accent)" />
+          <line x1="150" y1="130" x2="150" y2="54" stroke="var(--ink)" />
+          <line x1="150" y1="130" x2="112" y2="156" stroke="var(--slide)" />
+        </g>
+        <path d="M226 130 l-9 -5 v10 z" fill="var(--accent)" />
+        <path d="M150 54 l-5 9 h10 z" fill="var(--ink)" />
+        <path d="M112 156 l3 -10 l6 7 z" fill="var(--slide)" />
+        <circle cx="150" cy="130" r="3.5" fill="var(--ink)" />
+        <g font-family="IBM Plex Mono, ui-monospace, monospace" font-size="12" font-weight="500">
+          <text x="232" y="134" fill="var(--accent)">+X</text>
+          <text x="156" y="52" fill="var(--ink)">+Y</text>
+          <text x="92" y="162" fill="var(--slide)">+Z</text>
+        </g>
+        <g font-family="IBM Plex Sans, system-ui, sans-serif" font-size="11" fill="var(--muted)">
+          <text x="200" y="98">adelante</text>
+          <text x="158" y="70">arriba</text>
+          <text x="10" y="162">derecha</text>
+        </g>
+      </svg>
+      <figcaption class="cap">Origen en el suelo, centro del auto. En Blender: frente +X, derecha −Y, arriba +Z.</figcaption>
+    </figure>
+          <ul class="rules-short">
+            <li><b>Materiales:</b> PBR metal/rugosidad, un material por superficie, texturas ≤ 2048 px.</li>
+            <li><b>Polígonos:</b> carrocería ≤ 150k tris · motor completo ≤ 250k · pieza chica ≤ 10k.</li>
+            <li><b>Piezas de corte</b> (bloque, culata, carcasas): se ven translúcidas, mallas cerradas y con interior.</li>
+            <li><b>Caras de contacto modeladas:</b> en la vista desarmada todo se ve suelto.</li>
+            <li>Escala y rotación aplicadas; Draco permitido.</li>
+          </ul>
+        </div>
+      </section>
+  <section aria-labelledby="cotas">
+    <div class="section-head">
+      <span class="eyebrow">Referencia</span>
+      <h2 id="cotas">Cotas principales</h2>
+      <p>Medidas del montaje provisorio de la app. Mandan las del modelo existente.</p>
+    </div>
+    <div class="dims">
+      <div class="dim"><span class="k">Largo × ancho × alto</span><span class="v">4,50 × 1,76 × 1,43 m</span></div>
+      <div class="dim"><span class="k">Distancia entre ejes</span><span class="v">2,60 m</span></div>
+      <div class="dim"><span class="k">Trocha (centro a centro de rueda)</span><span class="v">1,50 m</span></div>
+      <div class="dim"><span class="k">Rueda, diámetro exterior</span><span class="v">620 mm · aro 16″</span></div>
+      <div class="dim"><span class="k">Eje del cigüeñal y de la caja</span><span class="v">y = 0,42 m · z = 0</span></div>
+      <div class="dim"><span class="k">Diámetro × carrera</span><span class="v">78 × 80 mm</span></div>
+      <div class="dim"><span class="k">Biela (entre centros)</span><span class="v">130 mm</span></div>
+      <div class="dim"><span class="k">Centros de cilindros 1 → 4</span><span class="v">x = 1,40 · 1,30 · 1,20 · 1,10</span></div>
+      <div class="dim"><span class="k">Cara superior del bloque</span><span class="v">y = 0,630 m</span></div>
+      <div class="dim"><span class="k">Ejes de levas</span><span class="v">y = 0,760 · z = ∓0,050</span></div>
+      <div class="dim"><span class="k">Distancia entre ejes de la caja</span><span class="v">100 mm</span></div>
+      <div class="dim"><span class="k">Reducción final del diferencial</span><span class="v">3,9 : 1</span></div>
+    </div>
+  </section>
+  <section aria-labelledby="piezas">
+    <div class="section-head">
+      <span class="eyebrow">Listado completo</span>
+      <h2 id="piezas">Piezas por sistema</h2>
+      <p>Coordenadas en metros (x, y, z). Cilindro 1 adelante.</p>
+    </div>
+    <div class="legend">
+      <span><span class="chip rot">gira</span></span>
+      <span><span class="chip slide">desliza</span> traslada o se inclina</span>
+      <span><span class="chip static">estática</span></span>
+      <span><span class="chip cut">corte</span> translúcida</span>
+    </div>
+    <nav class="systems" id="nav" aria-label="Sistemas"></nav>
+    <div id="tables" style="display:grid;gap:36px"></div>
+  </section>
+  <section aria-labelledby="check">
+    <div class="section-head">
+      <span class="eyebrow">Antes de enviar</span>
+      <h2 id="check">Revisión de cada archivo</h2>
+    </div>
+    <ul class="checklist">
+      <li>Nombre = ID, formato <code>.glb</code>.</li>
+      <li>Metros y posición de montaje.</li>
+      <li>Origen sobre el eje en piezas que giran.</li>
+      <li>Partes móviles separadas, con los nombres de nodo de la tabla.</li>
+      <li>Escala y rotación aplicadas.</li>
+      <li>Normales correctas, sin caras duplicadas; piezas de corte cerradas.</li>
+      <li>Materiales con nombre, texturas ≤ 2048 px.</li>
+      <li>Dentro del presupuesto de triángulos.</li>
+    </ul>
+  </section>
+    </div>
+  </details>
+
+  <footer>
+    Auto Atlas · especificación v1 del auto de referencia. Las posiciones salen del montaje actual de la app (<code>src/scene/layout.ts</code>) y pueden ajustarse de común acuerdo.
+  </footer>
+</div>
+
+<script>
+const SYSTEMS = [
+  { id: 'carroceria', name: 'Carrocería y chasis', color: '#94a3b8' },
+  { id: 'motor', name: 'Motor', color: '#ef4444' },
+  { id: 'electrico', name: 'Sistema eléctrico', color: '#eab308' },
+  { id: 'combustible', name: 'Combustible', color: '#ec4899' },
+  { id: 'refrigeracion', name: 'Refrigeración', color: '#06b6d4' },
+  { id: 'transmision', name: 'Transmisión', color: '#8b5cf6' },
+  { id: 'escape', name: 'Escape', color: '#a8a29e' },
+  { id: 'suspension', name: 'Suspensión', color: '#22c55e' },
+  { id: 'frenos', name: 'Frenos', color: '#f97316' },
+  { id: 'ruedas', name: 'Ruedas', color: '#64748b' },
+]
+
+// motion: rot | slide | static | cut
+const PARTS = [
+  // Carrocería y chasis
+  { s: 'carroceria', id: 'carroceria', name: 'Carrocería', qty: 1, m: ['static'],
+    sep: ['<code>carroceria</code> (pintura)', '<code>vidrios</code>', '<code>faros_delanteros</code>, <code>luces_traseras</code> (material emisivo)', '<code>parachoques</code>, <code>espejos</code>', 'Opcional: puertas, capó y maletero separados, con pivote en la bisagra'],
+    piv: 'Sin pivote especial.', pos: 'x −2,24 a 2,26 · y 0,30 a 1,43 · z ±0,88' },
+  { s: 'carroceria', id: 'habitaculo', name: 'Habitáculo', qty: 1, m: ['static'],
+    sep: ['<code>asiento_izq</code>, <code>asiento_der</code>, <code>asiento_trasero</code>', '<code>tablero</code>', '<code>volante</code> separado'],
+    piv: '<code>volante</code>: origen en el centro, eje a lo largo de la columna. Conducción a la izquierda.', pos: 'volante (0,22, 0,95, −0,36)' },
+  { s: 'carroceria', id: 'chasis', name: 'Chasis', qty: 1, m: ['static'],
+    sep: ['Largueros, travesaños y soportes de goma del motor, todo unido'],
+    piv: 'Sin pivote especial.', pos: 'largueros y = 0,36 · z ±0,45 · x −2,00 a 1,95' },
+
+  // Motor
+  { s: 'motor', id: 'bloque', name: 'Bloque del motor', qty: 1, m: ['static', 'cut'],
+    sep: ['Bloque con 4 cilindros de 78 mm de diámetro', 'Camisas de los cilindros visibles por dentro'],
+    piv: 'Sin pivote especial.', pos: 'x 1,03 a 1,47 · y 0,37 a 0,63 · z ±0,085' },
+  { s: 'motor', id: 'culata', name: 'Culata', qty: 1, m: ['static', 'cut'],
+    sep: ['Cámaras de combustión, conductos de admisión (lado −Z) y de escape (lado +Z), asientos de válvula'],
+    piv: 'Sin pivote especial.', pos: 'y 0,63 a 0,74' },
+  { s: 'motor', id: 'tapa-valvulas', name: 'Tapa de válvulas', qty: 1, m: ['static', 'cut'],
+    sep: ['Tapa con tapón de aceite', 'Agujeros para las 4 bujías sobre z = 0'],
+    piv: 'Sin pivote especial.', pos: 'y 0,74 a 0,81' },
+  { s: 'motor', id: 'carter', name: 'Cárter de aceite', qty: 1, m: ['static', 'cut'],
+    sep: ['Cárter con tapón de vaciado'], piv: 'Sin pivote especial.', pos: 'y 0,25 a 0,37' },
+  { s: 'motor', id: 'ciguenal', name: 'Cigüeñal', qty: 1, m: ['rot'],
+    sep: ['Un solo objeto: apoyos, muñequillas, contrapesos, polea de distribución (Ø 46 en x = 1,50), polea de accesorios (Ø 100 en x = 1,545) y brida trasera'],
+    piv: 'Eje X, sobre (y 0,42, z 0). Modelar con las muñequillas 1 y 4 hacia +Y (arriba) y las 2 y 3 hacia abajo. Radio de muñequilla 40 mm.', pos: 'x 1,03 a 1,56' },
+  { s: 'motor', id: 'pistones', name: 'Pistones', qty: 4, m: ['slide'],
+    sep: ['<code>piston_1</code> a <code>piston_4</code>, cada uno con sus aros y su bulón'],
+    piv: 'Origen en el centro del bulón. Sube y baja en Y. La cabeza queda 35 mm sobre el bulón.', pos: 'x del cilindro · bulón en y 0,59 con el pistón arriba' },
+  { s: 'motor', id: 'bielas', name: 'Bielas', qty: 4, m: ['rot', 'slide'],
+    sep: ['<code>biela_1</code> a <code>biela_4</code> (con tapa y pernos)'],
+    piv: 'Origen en el centro del ojo grande (muñequilla); el pie apunta a +Y a 130 mm. Oscila girando sobre X.', pos: 'x del cilindro' },
+  { s: 'motor', id: 'arbol-levas-admision', name: 'Árbol de levas de admisión', qty: 1, m: ['rot'],
+    sep: ['<code>eje</code> con apoyos y polea dentada (Ø 92 en x = 1,50)', '8 levas separadas: <code>leva_1a</code>, <code>leva_1b</code> … <code>leva_4b</code>'],
+    piv: 'Eje X, sobre (y 0,76, z −0,05). Cada leva con origen en el eje y la punta hacia −Y. Ángulo de fase lo ajustamos nosotros. Círculo base r 18 mm, alzada 12 mm.', pos: 'levas en x del cilindro ± 0,022' },
+  { s: 'motor', id: 'arbol-levas-escape', name: 'Árbol de levas de escape', qty: 1, m: ['rot'],
+    sep: ['Igual que el de admisión: <code>eje</code> + 8 levas separadas'],
+    piv: 'Eje X, sobre (y 0,76, z +0,05). Levas con la punta hacia −Y.', pos: 'levas en x del cilindro ± 0,022' },
+  { s: 'motor', id: 'valvulas', name: 'Válvulas', qty: 16, m: ['slide'],
+    sep: ['<code>valvula_adm_1a</code> … <code>valvula_esc_4b</code>: vástago, cabeza y taqué juntos', 'Resortes de válvula separados (<code>resorte_…</code>)'],
+    piv: 'Origen en la cara de la cabeza de la válvula. Baja 12 mm en Y. Admisión en z −0,05, escape en z +0,05.', pos: 'cara en y 0,634 · x del cilindro ± 0,022' },
+  { s: 'motor', id: 'correa-distribucion', name: 'Correa de distribución', qty: 1, m: ['static'],
+    sep: ['Correa dentada cerrada que envuelve las 3 poleas'],
+    piv: 'Sin pivote especial.', pos: 'plano x 1,50 · poleas en (y 0,42, z 0) y (y 0,76, z ±0,05)' },
+  { s: 'motor', id: 'correa-accesorios', name: 'Correa de accesorios', qty: 1, m: ['static'],
+    sep: ['Correa poly-V que envuelve cigüeñal, alternador y bomba de agua'],
+    piv: 'Sin pivote especial.', pos: 'plano x 1,545' },
+  { s: 'motor', id: 'volante-motor', name: 'Volante de inercia', qty: 1, m: ['rot'],
+    sep: ['Disco con corona dentada para el motor de arranque'],
+    piv: 'Eje X, sobre (y 0,42, z 0). Ø 260 mm.', pos: 'x 1,01' },
+  { s: 'motor', id: 'admision', name: 'Admisión', qty: 1, m: ['static'],
+    sep: ['Múltiple de 4 conductos (lado −Z), plenum, cuerpo de mariposa, ducto y caja del filtro de aire'],
+    piv: 'Sin pivote especial.', pos: 'filtro en (1,62, 0,64, −0,44)' },
+
+  // Eléctrico
+  { s: 'electrico', id: 'bujias', name: 'Bujías y bobinas', qty: 4, m: ['static'],
+    sep: ['<code>bujia_1</code> a <code>bujia_4</code> con su bobina encima'],
+    piv: 'Sin pivote especial.', pos: 'z 0 · x del cilindro · punta en y 0,636' },
+  { s: 'electrico', id: 'bateria', name: 'Batería', qty: 1, m: ['static'],
+    sep: ['Caja con bornes rojo (+) y negro (−)'], piv: 'Sin pivote especial.', pos: '(1,58, 0,55, 0,45) · 200 × 170 × 130 mm' },
+  { s: 'electrico', id: 'alternador', name: 'Alternador', qty: 1, m: ['static', 'rot'],
+    sep: ['<code>cuerpo</code> estático', '<code>polea</code> separada (Ø 50)'],
+    piv: 'Polea: eje X, sobre (y 0,62, z 0,17).', pos: 'polea en x 1,545' },
+
+  // Combustible
+  { s: 'combustible', id: 'estanque', name: 'Estanque de combustible', qty: 1, m: ['static'],
+    sep: ['Estanque', 'Línea de combustible opcional (se puede generar por código)'],
+    piv: 'Sin pivote especial.', pos: '(−0,83, 0,35, −0,23) · 450 × 180 × 340 mm' },
+  { s: 'combustible', id: 'inyeccion', name: 'Riel e inyectores', qty: 1, m: ['static'],
+    sep: ['Riel de combustible y 4 inyectores apuntando a los conductos de admisión'],
+    piv: 'Sin pivote especial.', pos: 'riel en y 0,72 · z −0,13' },
+
+  // Refrigeración
+  { s: 'refrigeracion', id: 'radiador', name: 'Radiador', qty: 1, m: ['static'],
+    sep: ['Panal con aletas, tanques superior e inferior, tapa, conexiones de manguera'],
+    piv: 'Sin pivote especial.', pos: 'x 1,86 · 600 (ancho) × 360 (alto) × 35 mm · centro y 0,50' },
+  { s: 'refrigeracion', id: 'ventilador', name: 'Electroventilador', qty: 1, m: ['static', 'rot'],
+    sep: ['<code>carcasa</code> y motor estáticos', '<code>aspas</code> separadas'],
+    piv: 'Aspas: eje X, sobre (y 0,50, z 0). Ø 300 mm.', pos: 'x 1,79' },
+  { s: 'refrigeracion', id: 'bomba-agua', name: 'Bomba de agua', qty: 1, m: ['static', 'rot'],
+    sep: ['<code>cuerpo</code> estático', '<code>polea</code> separada (Ø 80)'],
+    piv: 'Polea: eje X, sobre (y 0,58, z −0,13).', pos: 'polea en x 1,545' },
+  { s: 'refrigeracion', id: 'mangueras', name: 'Mangueras y termostato', qty: 1, m: ['static'],
+    sep: ['Manguera superior (motor → radiador), inferior (radiador → bomba), carcasa del termostato'],
+    piv: 'Sin pivote especial. Opcional (se pueden generar por código).', pos: 'termostato en (1,48, 0,71, 0,06)' },
+
+  // Transmisión
+  { s: 'transmision', id: 'embrague', name: 'Embrague', qty: 1, m: ['rot'],
+    sep: ['<code>plato_presion</code> con resorte de diafragma (gira con el motor)', '<code>disco</code> de fricción (gira con la caja)'],
+    piv: 'Ambos: eje X, sobre (y 0,42, z 0). Plato Ø 240, disco Ø 200.', pos: 'plato x 0,97 · disco x 0,992' },
+  { s: 'transmision', id: 'caja-cambios', name: 'Caja de cambios', qty: 1, m: ['static', 'cut'],
+    sep: ['Carcasa de la caja y campana del embrague'],
+    piv: 'Sin pivote especial.', pos: 'caja x 0,30 a 0,83 · y 0,25 a 0,55 · ancho 220 mm · campana x 0,83 a 1,02' },
+  { s: 'transmision', id: 'eje-primario', name: 'Eje primario', qty: 1, m: ['rot'],
+    sep: ['Eje estriado + engranaje de toma constante (Ø 100, 21 dientes)'],
+    piv: 'Eje X, sobre (y 0,42, z 0).', pos: 'x 0,77 a 0,99 · engranaje en x 0,77' },
+  { s: 'transmision', id: 'eje-intermediario', name: 'Eje intermediario', qty: 1, m: ['rot'],
+    sep: ['Un solo objeto: eje + 6 engranajes fijos. Diámetros: toma constante 100 · 1ª 44 · 2ª 64 · 3ª 85 · 4ª 100 · 5ª 110 mm'],
+    piv: 'Eje X, sobre (y 0,32, z 0).', pos: 'engranajes en x: toma 0,77 · 1ª 0,49 · 2ª 0,56 · 3ª 0,63 · 4ª 0,70 · 5ª 0,42' },
+  { s: 'transmision', id: 'eje-secundario', name: 'Eje secundario y sincronizador', qty: 1, m: ['rot', 'slide'],
+    sep: ['<code>eje</code>', '5 engranajes separados <code>engranaje_1</code> a <code>engranaje_5</code> (giran libres). Diámetros: 1ª 156 · 2ª 136 · 3ª 115 · 4ª 100 · 5ª 90 mm', '<code>sincronizador</code> separado (collar que se desliza en X)'],
+    piv: 'Todos: eje X, sobre (y 0,42, z 0). Sincronizador: origen en su centro.', pos: 'mismas x que el intermediario · eje de x 0,28 a 0,765' },
+  { s: 'transmision', id: 'palanca', name: 'Palanca de cambios', qty: 1, m: ['slide'],
+    sep: ['Palanca con pomo y fuelle'],
+    piv: 'Origen en la rótula de la base. Se inclina adelante/atrás e izquierda/derecha (patrón en H). Largo 400 mm.', pos: 'rótula en (0,52, 0,56, 0)' },
+  { s: 'transmision', id: 'cardan', name: 'Cardán', qty: 1, m: ['rot'],
+    sep: ['Tubo + 2 crucetas con sus horquillas'],
+    piv: 'Origen en el extremo delantero; eje del tubo a lo largo de la línea de delante hacia atrás. Gira sobre ese eje.', pos: 'de (0,28, 0,42, 0) a (−1,12, 0,31, 0)' },
+  { s: 'transmision', id: 'diferencial', name: 'Diferencial', qty: 1, m: ['rot'],
+    sep: ['<code>pinon</code> con su eje (Ø 60)', '<code>corona</code> (Ø 180) con la caja de satélites', '<code>satelite_1</code>, <code>satelite_2</code>, <code>planetario_izq</code>, <code>planetario_der</code> separados'],
+    piv: 'Piñón: eje X, sobre (y 0,31, z 0). Corona y planetarios: eje Z, sobre (−1,30, 0,31). Satélites: eje Y.', pos: 'centro (−1,30, 0,31, 0) · piñón en x −1,195' },
+  { s: 'transmision', id: 'puente-trasero', name: 'Puente trasero', qty: 1, m: ['static', 'cut'],
+    sep: ['Carcasa del diferencial y tubos del eje'],
+    piv: 'Sin pivote especial.', pos: 'carcasa en (−1,30, 0,31, 0) · tubos hasta z ±0,63' },
+  { s: 'transmision', id: 'semiejes', name: 'Semiejes', qty: 2, m: ['rot'],
+    sep: ['<code>semieje_izq</code>, <code>semieje_der</code>, cada uno con su brida'],
+    piv: 'Eje Z, sobre (x −1,30, y 0,31).', pos: 'z de ±0,04 a ±0,67' },
+
+  // Escape
+  { s: 'escape', id: 'multiple-escape', name: 'Múltiple de escape', qty: 1, m: ['static'],
+    sep: ['4 tubos desde la culata (lado +Z) hasta el colector'],
+    piv: 'Sin pivote especial.', pos: 'colector en (1,20, 0,46, 0,20)' },
+  { s: 'escape', id: 'catalizador', name: 'Catalizador', qty: 1, m: ['static'],
+    sep: ['Cuerpo con sus conos de entrada y salida'],
+    piv: 'Sin pivote especial.', pos: 'x 0,12 a 0,48 · y 0,20 · z 0,20 · Ø 110' },
+  { s: 'escape', id: 'silenciador', name: 'Tubo y silenciador', qty: 1, m: ['static'],
+    sep: ['Tubo de escape completo, silenciador y cola'],
+    piv: 'Sin pivote especial.', pos: 'silenciador en (−1,75, 0,22, 0,30) · 420 × 120 × 200 mm · salida en x −2,30' },
+
+  // Suspensión
+  { s: 'suspension', id: 'suspension-delantera', name: 'Suspensión delantera McPherson', qty: 2, m: ['static'],
+    sep: ['Por lado: <code>amortiguador</code>, <code>resorte</code>, <code>brazo_inferior</code>, <code>mangueta</code>', 'Resorte y amortiguador separados'],
+    piv: 'Resorte: origen en su base, eje a lo largo del amortiguador.', pos: 'x 1,30 · z ±0,60 · resorte y 0,55 a 0,75' },
+  { s: 'suspension', id: 'suspension-trasera', name: 'Suspensión trasera', qty: 2, m: ['static'],
+    sep: ['Por lado: <code>resorte</code>, <code>amortiguador</code>, <code>brazo_longitudinal</code>'],
+    piv: 'Resorte: origen en su base, eje Y.', pos: 'resorte en (−1,30, 0,35 a 0,61, ±0,48)' },
+
+  // Frenos
+  { s: 'frenos', id: 'frenos', name: 'Frenos de disco', qty: 4, m: ['rot', 'static'],
+    sep: ['<code>disco</code> (gira con la rueda)', '<code>pinza</code> con pastillas (estática)', 'Se entrega uno; se instancia ×4'],
+    piv: 'Disco: eje Z, sobre el centro de la rueda. Ø 300.', pos: 'z ±0,70 · pinza arriba y hacia atrás del disco' },
+
+  // Ruedas
+  { s: 'ruedas', id: 'ruedas', name: 'Ruedas y neumáticos', qty: 4, m: ['rot'],
+    sep: ['<code>neumatico</code> y <code>llanta</code> (pueden ir juntos)', 'Se entrega una; se instancia ×4'],
+    piv: 'Eje Z, sobre el centro de la rueda. Ø 620 exterior, aro 16″, ancho 200 mm.', pos: 'centros en (±1,30, 0,31, ±0,75)' },
+]
+
+const CHIP = { rot: 'gira', slide: 'desliza', static: 'estática', cut: 'corte' }
+
+const nav = document.getElementById('nav')
+const tables = document.getElementById('tables')
+
+for (const sys of SYSTEMS) {
+  const rows = PARTS.filter((p) => p.s === sys.id)
+  const units = rows.reduce((n, p) => n + p.qty, 0)
+
+  const link = document.createElement('a')
+  link.href = '#' + sys.id
+  link.innerHTML = `<span class="dot" style="background:${sys.color}"></span>${sys.name}`
+  nav.appendChild(link)
+
+  const block = document.createElement('div')
+  block.className = 'system'
+  block.id = sys.id
+  block.innerHTML = `
+    <div class="system-title">
+      <span class="dot" style="background:${sys.color};width:10px;height:10px"></span>
+      <h3>${sys.name}</h3>
+      <span class="count">${rows.length} ${rows.length === 1 ? 'pieza' : 'piezas'} · ${units} ${units === 1 ? 'unidad' : 'unidades'}</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <colgroup><col class="c-id"><col class="c-name"><col class="c-qty"><col class="c-motion"><col class="c-sep"><col class="c-pivot"></colgroup>
+        <thead><tr><th>ID / archivo</th><th>Pieza</th><th>Cant.</th><th>Movimiento</th><th>Objetos separados</th><th>Pivote y posición</th></tr></thead>
+        <tbody>${rows
+          .map(
+            (p) => `<tr>
+              <td class="id"><code>${p.id}.glb</code></td>
+              <td class="name">${p.name}</td>
+              <td class="qty">${p.qty}</td>
+              <td class="motion">${p.m.map((k) => `<span class="chip ${k}">${CHIP[k]}</span>`).join('')}</td>
+              <td><ul>${p.sep.map((x) => `<li>${x}</li>`).join('')}</ul></td>
+              <td>${p.piv}<span class="pos">${p.pos}</span></td>
+            </tr>`,
+          )
+          .join('')}</tbody>
+      </table>
+    </div>`
+  tables.appendChild(block)
+}
+
+const APARTE = {
+  carroceria: 'vidrios y luces aparte',
+  habitaculo: 'volante aparte',
+  pistones: 'cada uno aparte',
+  bielas: 'cada una aparte',
+  'arbol-levas-admision': 'eje + 8 levas aparte',
+  'arbol-levas-escape': 'eje + 8 levas aparte',
+  valvulas: 'cada una aparte, resortes aparte',
+  bujias: 'cada una aparte',
+  alternador: 'polea aparte',
+  ventilador: 'aspas aparte',
+  'bomba-agua': 'polea aparte',
+  embrague: 'plato y disco aparte',
+  'eje-secundario': 'eje, 5 engranajes y sincronizador aparte',
+  diferencial: 'piñón, corona, satélites y planetarios aparte',
+  semiejes: 'cada uno aparte',
+  'suspension-delantera': 'resorte y amortiguador aparte',
+  'suspension-trasera': 'resorte y amortiguador aparte',
+  frenos: 'disco y pinza aparte · basta uno',
+  ruedas: 'basta una',
+}
+const quick = document.getElementById('quick')
+for (const sys of SYSTEMS) {
+  const rows = PARTS.filter((p) => p.s === sys.id)
+  const box = document.createElement('div')
+  box.className = 'qsys'
+  box.innerHTML = `<h3><span class="dot" style="background:${sys.color}"></span>${sys.name}</h3>
+    <ul>${rows
+      .map((p) => `<li><span>${p.name}</span>${p.qty > 1 ? `<span class="q">×${p.qty}</span>` : ''}${APARTE[p.id] ? `<span class="sep">${APARTE[p.id]}</span>` : ''}</li>`)
+      .join('')}</ul>`
+  quick.appendChild(box)
+}
+</script>
