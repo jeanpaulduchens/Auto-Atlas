@@ -13,11 +13,13 @@ import { BACKGROUND, StudioFloor, StudioLights } from './Studio'
 // El post-procesado va en un archivo aparte que solo se descarga en calidad alta
 const Effects = lazy(() => import('./Effects'))
 import { Body } from './Body'
-import { Chassis } from './Chassis'
+import { Chassis, Injection } from './Chassis'
 import { Cooling } from './Cooling'
-import { Drivetrain } from './Drivetrain'
+import { Clutch, Drivetrain, Lever } from './Drivetrain'
 import { Engine } from './Engine'
-import { Exhaust } from './Exhaust'
+import { Exhaust, Manifold } from './Exhaust'
+import { FrontDifferential, FrontHalfShafts, TransaxleCase, TransaxleShafts } from './FrontDrive'
+import { ENGINE_FRAMES, engineDirToWorld } from './layout'
 import { Turbo } from './Turbo'
 
 const HOME = { target: new Vector3(-0.3, 0.6, 0.4), position: new Vector3(4.6, 2.6, 5.6) }
@@ -100,7 +102,10 @@ function CameraRig() {
     // Bajar un poco el objetivo sube las piezas en pantalla y deja libre la tarjeta del recorrido
     const target = sphere.center.clone()
     target.y -= sphere.radius * 0.12
-    const dir = new Vector3(...(v.dir ?? [0.5, 0.4, 1])).normalize()
+    const d = v.dir ?? [0.5, 0.4, 1]
+    // Vistas del motor: la dirección se da respecto al motor y gira con él si es transversal
+    const layout = CARS[useStore.getState().car].layout
+    const dir = new Vector3(...(v.engineSpace ? engineDirToWorld(layout, d) : d)).normalize()
     return { target, position: target.clone().addScaledVector(dir, dist) }
   }
 
@@ -179,25 +184,61 @@ function GroundShadow() {
   )
 }
 
-/** Arma el auto con los módulos de la versión elegida. */
+/** Cables de la palanca en tracción delantera: de la consola al transeje, adelante. */
+const FWD_LEVER_BASE: [number, number, number] = [0.22, 0.47, 0]
+const FWD_SHIFT_CABLES: [number, number, number][] = [
+  [0.22, 0.46, 0],
+  [0.55, 0.42, 0.05],
+  [0.95, 0.44, 0.22],
+  [1.26, 0.54, 0.34],
+]
+
+/**
+ * Arma el auto con los módulos de la versión elegida. El motor, el embrague y
+ * el transeje van dentro del marco del conjunto motor (girado 90° si es
+ * transversal); lo demás, en coordenadas del auto.
+ */
 function CarModules() {
-  const car = useStore((s) => s.car)
-  const has = (m: Parameters<typeof hasModule>[1]) => hasModule(car, m)
+  const carId = useStore((s) => s.car)
+  const car = CARS[carId]
+  const has = (m: Parameters<typeof hasModule>[1]) => hasModule(carId, m)
   const turbo = has('turbo')
+  const manual = has('caja-manual')
+  const fwd = has('traccion-delantera')
+  const rwd = has('traccion-trasera')
+  const frame = ENGINE_FRAMES[car.layout]
   return (
     // key: al cambiar de versión se montan piezas nuevas (materiales, anclas de etiquetas, sombra)
-    <group key={car}>
+    <group key={carId}>
       {has('combustion') && (
         <>
-          <Engine turbo={turbo} />
-          <Cooling />
-          <Exhaust turbo={turbo} />
+          <group position={frame.position} rotation-y={frame.rotationY}>
+            <Engine turbo={turbo} />
+            <Manifold />
+            <Injection />
+            {manual && <Clutch />}
+            {manual && fwd && (
+              <>
+                <TransaxleCase />
+                <TransaxleShafts />
+              </>
+            )}
+          </group>
+          <Cooling layout={car.layout} />
+          <Exhaust turbo={turbo} layout={car.layout} />
         </>
       )}
       {turbo && <Turbo />}
-      {has('manual-longitudinal') && has('traccion-trasera') && <Drivetrain />}
-      <Chassis />
-      <Body />
+      {rwd && <Drivetrain />}
+      {fwd && (
+        <>
+          <FrontDifferential />
+          <FrontHalfShafts />
+          {manual && <Lever base={FWD_LEVER_BASE} length={0.32} cables={FWD_SHIFT_CABLES} />}
+        </>
+      )}
+      <Chassis layout={car.layout} rear={rwd ? 'rigido' : 'torsion'} />
+      <Body kind={car.body} />
     </group>
   )
 }

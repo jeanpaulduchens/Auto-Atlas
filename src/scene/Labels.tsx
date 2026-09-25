@@ -6,18 +6,18 @@ import { PARTS, SYSTEMS, SYSTEM_ORDER, partInCar, type SystemId } from '../data/
 import { useStore } from '../store'
 import { partAnchor } from './registry'
 
-/** Pieza sobre la que se ancla la etiqueta de cada sistema. */
-const SYSTEM_ANCHOR: Record<SystemId, string> = {
-  carroceria: 'carroceria',
-  motor: 'culata',
-  electrico: 'bateria',
-  combustible: 'estanque',
-  refrigeracion: 'radiador',
-  transmision: 'caja-cambios',
-  escape: 'silenciador',
-  suspension: 'suspension-delantera',
-  frenos: 'frenos',
-  ruedas: 'ruedas',
+/** Pieza sobre la que se ancla la etiqueta de cada sistema (la primera que exista en la versión). */
+const SYSTEM_ANCHOR: Record<SystemId, string[]> = {
+  carroceria: ['carroceria'],
+  motor: ['culata'],
+  electrico: ['bateria'],
+  combustible: ['estanque'],
+  refrigeracion: ['radiador'],
+  transmision: ['caja-cambios', 'transeje'],
+  escape: ['silenciador'],
+  suspension: ['suspension-delantera'],
+  frenos: ['frenos'],
+  ruedas: ['ruedas'],
 }
 
 const BASE_LIFT = 30 // px entre el punto de anclaje y la etiqueta
@@ -194,7 +194,7 @@ export function Labels() {
         <Label
           key={s}
           labelKey={`sistema-${s}`}
-          partId={SYSTEM_ANCHOR[s]}
+          partId={SYSTEM_ANCHOR[s].find((id) => partInCar(id, car)) ?? SYSTEM_ANCHOR[s][0]}
           text={SYSTEMS[s].name}
           color={SYSTEMS[s].color}
           active={false}

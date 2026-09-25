@@ -56,6 +56,8 @@ export interface CameraView {
   dir?: V3
   /** >1 aleja, <1 acerca. */
   zoom?: number
+  /** La dirección es relativa al motor (gira con él en un motor transversal). */
+  engineSpace?: boolean
   cam?: V3
   target?: V3
 }

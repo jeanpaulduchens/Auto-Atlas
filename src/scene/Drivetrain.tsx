@@ -6,7 +6,7 @@ import { sim } from '../sim'
 import { CARS } from '../cars'
 import { useStore } from '../store'
 import { Part, type V3 } from './Part'
-import { Beam, Gear, Spinner } from './helpers'
+import { Beam, Gear, Pipe, Spinner } from './helpers'
 import { M } from './materials'
 import {
   CRANK_Y,
@@ -41,7 +41,8 @@ function diaphragmGeometry() {
   )
 }
 
-function Clutch() {
+/** Embrague: en coordenadas del conjunto motor (va dentro de su marco en ambas disposiciones). */
+export function Clutch() {
   const diaphragm = useMemo(diaphragmGeometry, [])
   return (
     <Part id="embrague" explode={[0, 0, -0.45]}>
@@ -154,7 +155,8 @@ const H_PATTERN: Record<number, [number, number]> = {
   5: [-0.28, 0.2],
 }
 
-function Lever() {
+/** Palanca; con `cables`, la une a la caja por dos cables (caja lejos, como en tracción delantera). */
+export function Lever({ base = [0.52, CASE.y1 + 0.01, 0], length = 0.4, cables }: { base?: V3; length?: number; cables?: V3[] }) {
   const pivot = useRef<Group>(null)
   useFrame((_, dt) => {
     const g = pivot.current
@@ -166,17 +168,21 @@ function Lever() {
   })
   return (
     <Part id="palanca" explode={[0, 0.7, 0]}>
-      <group ref={pivot} position={[0.52, CASE.y1 + 0.01, 0]}>
-        <mesh position={[0, 0.2, 0]} material={M.chrome}>
-          <cylinderGeometry args={[0.008, 0.01, 0.4, 12]} />
+      <group ref={pivot} position={base}>
+        <mesh position={[0, length / 2, 0]} material={M.chrome}>
+          <cylinderGeometry args={[0.008, 0.01, length, 12]} />
         </mesh>
-        <mesh position={[0, 0.41, 0]} material={M.black}>
+        <mesh position={[0, length + 0.01, 0]} material={M.black}>
           <sphereGeometry args={[0.03, 20, 20]} />
         </mesh>
         <mesh position={[0, 0.03, 0]} material={M.rubber}>
           <coneGeometry args={[0.05, 0.08, 16]} />
         </mesh>
       </group>
+      {cables &&
+        [-0.018, 0.018].map((dz) => (
+          <Pipe key={dz} points={cables.map(([x, y, z]) => [x, y, z + dz] as V3)} r={0.005} material={M.black} />
+        ))}
     </Part>
   )
 }
@@ -279,10 +285,10 @@ function HalfShafts() {
   )
 }
 
+/** Transmisión de tracción trasera (el embrague va aparte, con el motor). */
 export function Drivetrain() {
   return (
     <>
-      <Clutch />
       <GearboxCase />
       <InputShaft />
       <Countershaft />

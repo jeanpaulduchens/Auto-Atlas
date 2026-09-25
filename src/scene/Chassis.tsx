@@ -7,7 +7,8 @@ import { Part } from './Part'
 import { Beam, Coil, FlowDots, Pipe, Spinner, curveThrough } from './helpers'
 import { EngineMounts } from './Engine'
 import { M } from './materials'
-import { DECK_Y, FRONT_AXLE_X, REAR_AXLE_X, TRACK_Z, WHEEL_Y } from './layout'
+import { DECK_Y, FRONT_AXLE_X, REAR_AXLE_X, TRACK_Z, WHEEL_Y, engineToWorld, type EngineLayout } from './layout'
+import type { V3 } from './Part'
 
 const WHEELS = [FRONT_AXLE_X, REAR_AXLE_X].flatMap((x) => [-1, 1].map((s) => ({ x, s })))
 
@@ -115,29 +116,84 @@ function RearSuspension() {
   )
 }
 
-function Frame() {
+/** Eje trasero de torsión (tracción delantera): brazos longitudinales unidos por una viga. */
+function RearTorsionBeam() {
+  const x = REAR_AXLE_X
+  return (
+    <>
+      {[-1, 1].map((s) => (
+        <Part key={s} id="suspension-trasera-torsion" explode={[0, 0.15, s * 0.3]}>
+          <Beam a={[x + 0.5, 0.3, s * 0.58]} b={[x, WHEEL_Y, s * 0.6]} r={0.022} box material={M.black} />
+          <mesh position={[x, WHEEL_Y, s * 0.62]} material={M.castIron}>
+            <boxGeometry args={[0.07, 0.1, 0.04]} />
+          </mesh>
+          <Coil radius={0.05} height={0.25} turns={6} wire={0.007} material={M.red} position={[x - 0.12, 0.33, s * 0.56]} />
+          <Beam a={[x - 0.2, 0.32, s * 0.6]} b={[x - 0.24, 0.66, s * 0.56]} r={0.015} material={M.darkSteel} />
+        </Part>
+      ))}
+      <Part id="suspension-trasera-torsion" explode={[0, -0.05, 0]}>
+        <Beam a={[x + 0.18, 0.27, -0.58]} b={[x + 0.18, 0.27, 0.58]} r={0.03} box material={M.black} />
+      </Part>
+    </>
+  )
+}
+
+/**
+ * Chasis de escalera. En tracción delantera los largueros suben adelante para
+ * pasar por encima del transeje, y los soportes del motor cambian de lugar.
+ */
+function Frame({ layout }: { layout: EngineLayout }) {
+  const transversal = layout === 'transversal'
   return (
     <Part id="chasis" explode={[0, -0.28, 0]}>
-      {[-1, 1].map((s) => (
-        <Beam key={s} a={[-2.0, 0.36, s * 0.45]} b={[1.95, 0.36, s * 0.45]} r={0.03} box material={M.darkSteel} />
-      ))}
-      {[1.7, 0.15, -1.9].map((x) => (
+      {[-1, 1].map((s) =>
+        transversal ? (
+          <group key={s}>
+            <Beam a={[-2.0, 0.36, s * 0.45]} b={[0.85, 0.36, s * 0.45]} r={0.03} box material={M.darkSteel} />
+            <Beam a={[0.85, 0.36, s * 0.45]} b={[1.05, 0.58, s * 0.47]} r={0.03} box material={M.darkSteel} />
+            <Beam a={[1.05, 0.58, s * 0.47]} b={[1.95, 0.58, s * 0.47]} r={0.03} box material={M.darkSteel} />
+          </group>
+        ) : (
+          <Beam key={s} a={[-2.0, 0.36, s * 0.45]} b={[1.95, 0.36, s * 0.45]} r={0.03} box material={M.darkSteel} />
+        ),
+      )}
+      {[0.15, -1.9].map((x) => (
         <Beam key={x} a={[x, 0.36, -0.45]} b={[x, 0.36, 0.45]} r={0.025} box material={M.darkSteel} />
       ))}
-      <EngineMounts />
+      {transversal ? (
+        <>
+          {/* Travesaño delantero bajo (no tapa el motor) y postes hasta los largueros */}
+          <Beam a={[1.72, 0.36, -0.47]} b={[1.72, 0.36, 0.47]} r={0.025} box material={M.darkSteel} />
+          {[-1, 1].map((s) => (
+            <Beam key={s} a={[1.72, 0.36, s * 0.47]} b={[1.72, 0.58, s * 0.47]} r={0.025} box material={M.darkSteel} />
+          ))}
+          {/* Soportes: lado transeje y lado distribución */}
+          <Beam a={[1.38, 0.52, 0.42]} b={[1.38, 0.58, 0.47]} r={0.02} box material={M.rubber} />
+          <Beam a={[1.37, 0.45, -0.28]} b={[1.25, 0.58, -0.47]} r={0.018} box material={M.rubber} />
+        </>
+      ) : (
+        <>
+          <Beam a={[1.7, 0.36, -0.45]} b={[1.7, 0.36, 0.45]} r={0.025} box material={M.darkSteel} />
+          <EngineMounts />
+        </>
+      )}
     </Part>
   )
 }
 
-function Battery() {
+/** Con motor transversal, el transeje ocupa el lugar de la batería: se corre hacia atrás. */
+const BATTERY: Record<EngineLayout, V3> = { longitudinal: [1.58, 0.55, 0.45], transversal: [1.05, 0.62, 0.35] }
+
+function Battery({ layout }: { layout: EngineLayout }) {
+  const [bx, by, bz] = BATTERY[layout]
   return (
     <Part id="bateria" explode={[0.2, 0.55, 0.35]}>
-      <RoundedBox args={[0.2, 0.17, 0.13]} radius={0.008} position={[1.58, 0.55, 0.45]} material={M.black} />
+      <RoundedBox args={[0.2, 0.17, 0.13]} radius={0.008} position={[bx, by, bz]} material={M.black} />
       {[
         { dx: -0.06, mat: M.red },
         { dx: 0.06, mat: M.black },
       ].map(({ dx, mat }) => (
-        <mesh key={dx} position={[1.58 + dx, 0.645, 0.45]} material={mat}>
+        <mesh key={dx} position={[bx + dx, by + 0.095, bz]} material={mat}>
           <cylinderGeometry args={[0.012, 0.012, 0.025, 12]} />
         </mesh>
       ))}
@@ -145,26 +201,31 @@ function Battery() {
   )
 }
 
-const FUEL_LINE: [number, number, number][] = [
-  [-0.6, 0.3, -0.2],
-  [0.2, 0.3, -0.2],
-  [0.95, 0.35, -0.2],
-  [1.08, DECK_Y + 0.05, -0.15],
-  [1.1, DECK_Y + 0.09, -0.13],
-]
+/** Extremo del riel de inyección, en coordenadas del conjunto motor. */
+const RAIL_END: V3 = [1.1, DECK_Y + 0.09, -0.13]
 
-function FuelTank() {
-  const curve = useMemo(() => curveThrough(FUEL_LINE), [])
+/** Línea de combustible: del estanque al riel de inyección, esté donde esté el motor. */
+function fuelLine(layout: EngineLayout): V3[] {
+  const end = engineToWorld(layout, RAIL_END)
+  return layout === 'transversal'
+    ? [[-0.6, 0.3, -0.2], [0.6, 0.3, -0.2], [0.95, 0.45, -0.1], [1.12, 0.7, 0.0], end]
+    : [[-0.6, 0.3, -0.2], [0.2, 0.3, -0.2], [0.95, 0.35, -0.2], engineToWorld(layout, [1.08, DECK_Y + 0.05, -0.15]), end]
+}
+
+function FuelTank({ layout }: { layout: EngineLayout }) {
+  const line = useMemo(() => fuelLine(layout), [layout])
+  const curve = useMemo(() => curveThrough(line), [line])
   return (
     <Part id="estanque" explode={[0, -0.2, -0.45]}>
       <RoundedBox args={[0.45, 0.18, 0.34]} radius={0.03} position={[-0.83, 0.35, -0.23]} material={M.fuelTank} />
-      <Pipe points={FUEL_LINE} r={0.006} material={M.steel} />
+      <Pipe points={line} r={0.006} material={M.steel} />
       <FlowDots curve={curve} color="#f472b6" count={30} size={0.008} speed={0.12} />
     </Part>
   )
 }
 
-function Injection() {
+/** Riel e inyectores: en coordenadas del conjunto motor (va dentro de su marco). */
+export function Injection() {
   const y = DECK_Y + 0.09
   return (
     <Part id="inyeccion" explode={[0, 0.45, -0.25]}>
@@ -178,17 +239,16 @@ function Injection() {
   )
 }
 
-export function Chassis() {
+export function Chassis({ layout, rear }: { layout: EngineLayout; rear: 'rigido' | 'torsion' }) {
   return (
     <>
       <Wheels />
       <Brakes />
       <FrontSuspension />
-      <RearSuspension />
-      <Frame />
-      <Battery />
-      <FuelTank />
-      <Injection />
+      {rear === 'rigido' ? <RearSuspension /> : <RearTorsionBeam />}
+      <Frame layout={layout} />
+      <Battery layout={layout} />
+      <FuelTank layout={layout} />
     </>
   )
 }

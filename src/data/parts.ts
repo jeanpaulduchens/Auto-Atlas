@@ -35,8 +35,8 @@ export const SYSTEM_ORDER = Object.keys(SYSTEMS) as SystemId[]
 export interface PartInfo {
   name: string
   system: SystemId
-  /** Módulo al que pertenece; sin módulo, la pieza está en todas las versiones. */
-  module?: Module
+  /** Módulos que debe tener la versión para incluir la pieza (todos); sin módulo, está en todas. */
+  module?: Module | Module[]
   summary: string
   how: string[]
   fact?: string
@@ -373,7 +373,7 @@ export const PARTS: Record<string, PartInfo> = {
   embrague: {
     name: 'Embrague',
     system: 'transmision',
-    module: 'manual-longitudinal',
+    module: 'caja-manual',
     summary: 'Conecta y desconecta el motor de la caja de cambios.',
     how: [
       'Un disco con material de fricción queda apretado entre el volante y el plato de presión por un resorte de diafragma.',
@@ -384,7 +384,7 @@ export const PARTS: Record<string, PartInfo> = {
   'caja-cambios': {
     name: 'Caja de cambios (carcasa)',
     system: 'transmision',
-    module: 'manual-longitudinal',
+    module: ['caja-manual', 'traccion-trasera'],
     summary: 'Contiene los ejes y engranajes que cambian la relación entre las vueltas del motor y las de las ruedas.',
     how: [
       'Es una caja manual de 5 velocidades. Los engranajes giran bañados en aceite.',
@@ -395,7 +395,7 @@ export const PARTS: Record<string, PartInfo> = {
   'eje-primario': {
     name: 'Eje primario (de entrada)',
     system: 'transmision',
-    module: 'manual-longitudinal',
+    module: ['caja-manual', 'traccion-trasera'],
     summary: 'Recibe el giro del motor a través del embrague y lo pasa al eje intermediario.',
     how: [
       'Su engranaje está siempre engranado con el primer engranaje del eje intermediario (engranaje de toma constante).',
@@ -404,7 +404,7 @@ export const PARTS: Record<string, PartInfo> = {
   'eje-intermediario': {
     name: 'Eje intermediario',
     system: 'transmision',
-    module: 'manual-longitudinal',
+    module: ['caja-manual', 'traccion-trasera'],
     summary: 'Eje inferior con un engranaje fijo por cada marcha. Gira siempre que el embrague está suelto.',
     how: [
       'Cada engranaje del intermediario está permanentemente engranado con su pareja del eje secundario.',
@@ -414,7 +414,7 @@ export const PARTS: Record<string, PartInfo> = {
   'eje-secundario': {
     name: 'Eje secundario y sincronizador',
     system: 'transmision',
-    module: 'manual-longitudinal',
+    module: ['caja-manual', 'traccion-trasera'],
     summary: 'Eje de salida hacia el cardán. Sus engranajes giran “locos” hasta que el sincronizador bloquea uno.',
     how: [
       'Todos los engranajes del secundario giran siempre, cada uno a su velocidad, pero libres sobre el eje.',
@@ -425,11 +425,12 @@ export const PARTS: Record<string, PartInfo> = {
   palanca: {
     name: 'Palanca de cambios',
     system: 'transmision',
-    module: 'manual-longitudinal',
+    module: 'caja-manual',
     summary: 'Mueve las horquillas que desplazan los sincronizadores dentro de la caja.',
     how: [
       'Patrón en H: izquierda-derecha elige la horquilla y adelante-atrás la mueve.',
       'Cambia de marcha en el panel y mira cómo se mueven la palanca y el collar dorado.',
+      'En los autos de tracción delantera la caja queda lejos, adelante: la palanca la mueve a través de dos cables.',
     ],
   },
   cardan: {
@@ -467,6 +468,63 @@ export const PARTS: Record<string, PartInfo> = {
     module: 'traccion-trasera',
     summary: 'Ejes que llevan el giro desde el diferencial hasta cada rueda trasera.',
     how: ['Se conectan a los engranajes planetarios del diferencial por un extremo y al buje de la rueda por el otro.'],
+  },
+
+  // ── Tracción delantera ────────────────────────────────────────
+  transeje: {
+    name: 'Transeje',
+    system: 'transmision',
+    module: ['caja-manual', 'traccion-delantera'],
+    summary:
+      'Caja de cambios y diferencial en una sola carcasa, atornillada al costado del motor. Es la solución de casi todos los autos de tracción delantera.',
+    how: [
+      'Con el motor atravesado, no hay espacio para una caja larga y un cardán: todo se junta en un bloque compacto.',
+      'Adentro hay solo dos ejes (primario y secundario) y, al final, el diferencial que reparte el giro a las ruedas delanteras.',
+    ],
+    fact: 'El Mini de 1959 popularizó el motor transversal con tracción delantera: dejaba el 80 % del auto para pasajeros y equipaje.',
+  },
+  'transeje-ejes': {
+    name: 'Ejes y engranajes del transeje',
+    system: 'transmision',
+    module: ['caja-manual', 'traccion-delantera'],
+    summary: 'El eje primario recibe el giro del embrague; el secundario lo entrega, reducido, al diferencial.',
+    how: [
+      'A diferencia de la caja longitudinal, aquí no hay eje intermediario: cada engranaje del primario engrana directo con su pareja del secundario.',
+      'Los engranajes del secundario giran libres hasta que el sincronizador (collar dorado) bloquea el de la marcha elegida.',
+      'En el extremo del secundario, un piñón pequeño mueve la corona del diferencial.',
+    ],
+  },
+  'diferencial-delantero': {
+    name: 'Diferencial delantero',
+    system: 'transmision',
+    module: 'traccion-delantera',
+    summary: 'Reparte el giro entre las dos ruedas delanteras y deja que giren a distinta velocidad en las curvas.',
+    how: [
+      'Su corona (dorada) la mueve el piñón del eje secundario, con una reducción final de unas 4 veces.',
+      'Como las ruedas delanteras además giran para doblar, en una curva la diferencia de velocidad entre ellas es aún mayor que en un auto de tracción trasera.',
+    ],
+  },
+  'semiejes-delanteros': {
+    name: 'Semiejes y juntas homocinéticas',
+    system: 'transmision',
+    module: 'traccion-delantera',
+    summary: 'Llevan el giro del diferencial a cada rueda delantera, aunque la rueda esté girada para doblar y subiendo o bajando con la suspensión.',
+    how: [
+      'En cada extremo hay una junta homocinética (bajo el fuelle de goma negro): transmite el giro a velocidad constante aunque el eje trabaje en ángulo.',
+      'Una junta universal (cruceta) como la del cardán haría que la rueda acelere y frene en cada vuelta cuando está doblada; la homocinética lo evita.',
+      'Suelen ser de distinto largo, porque el diferencial no queda en el centro del auto.',
+    ],
+    fact: 'Un fuelle roto deja salir la grasa y entrar tierra: la junta empieza a sonar con un “clac-clac” al doblar.',
+  },
+  'suspension-trasera-torsion': {
+    name: 'Suspensión trasera de eje de torsión',
+    system: 'suspension',
+    module: 'traccion-delantera',
+    summary: 'Dos brazos longitudinales unidos por una viga que se tuerce. Simple, barata y ocupa poco espacio.',
+    how: [
+      'Cuando una rueda sube, la viga se tuerce y actúa como barra estabilizadora.',
+      'Como las ruedas traseras no reciben fuerza del motor, basta con esta suspensión sencilla, que además deja espacio para el piso del maletero.',
+    ],
   },
 
   // ── Escape ────────────────────────────────────────────────────
@@ -543,7 +601,7 @@ export const PARTS: Record<string, PartInfo> = {
     how: [
       'La superficie de contacto de cada neumático con el suelo es del tamaño de una mano.',
       'El dibujo de la banda de rodadura evacúa el agua para no perder agarre al mojarse.',
-      'Con una marcha puesta y el embrague suelto, las ruedas traseras giran: mira la velocidad en el panel.',
+      'Con una marcha puesta y el embrague suelto, las ruedas motrices giran: mira la velocidad en el panel.',
     ],
   },
 }
@@ -551,5 +609,6 @@ export const PARTS: Record<string, PartInfo> = {
 /** ¿La pieza forma parte de esta versión del auto? */
 export const partInCar = (id: string, car: CarId) => {
   const m = PARTS[id]?.module
-  return !m || CARS[car].modules.includes(m)
+  if (!m) return true
+  return (Array.isArray(m) ? m : [m]).every((x) => CARS[car].modules.includes(x))
 }

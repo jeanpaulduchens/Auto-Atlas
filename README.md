@@ -50,13 +50,14 @@ src/
     Labels.tsx       Etiquetas sobre las piezas, acomodadas para no taparse
     Studio.tsx       Iluminación de estudio, piso y post-procesado
     textures.ts      Texturas de superficie generadas por código (fundición, cepillado, rodadura)
-    layout.ts        Cotas del auto (dónde va cada cosa, en metros)
+    layout.ts        Cotas del auto y disposición del conjunto motor (longitudinal o transversal)
     helpers.tsx      Engranajes, resortes, correas, tubos, partículas de flujo
     Engine.tsx       Motor 4 cilindros DOHC 16v
     Drivetrain.tsx   Embrague, caja de 5 velocidades, cardán, diferencial
     Cooling.tsx      Radiador, ventilador, mangueras
     Exhaust.tsx      Múltiple, catalizador, silenciador
     Turbo.tsx        Turbocompresor, intercooler y ductos
+    FrontDrive.tsx   Tracción delantera: transeje, diferencial delantero, semiejes homocinéticos
     Chassis.tsx      Ruedas, frenos, suspensión, chasis, batería, combustible
     Body.tsx         Carrocería e interior
   ui/                Paneles HTML sobre el canvas
@@ -99,5 +100,5 @@ Fuentes a revisar (siempre verificar la licencia de cada modelo):
 - [x] Recorridos guiados paso a paso
 - [x] Corte de sección y etiquetas sobre las piezas
 - [ ] Carrocería con un modelo `.glb` más realista
-- [x] Versiones de auto: sedán clásico y sedán turbo
-- [ ] Más versiones: tracción delantera transversal, caja automática, eléctrico
+- [x] Versiones de auto: sedán clásico, sedán turbo y compacto de tracción delantera
+- [ ] Más versiones: caja automática, eléctrico

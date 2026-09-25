@@ -75,6 +75,18 @@ function cabin(s: Shape) {
   s.closePath()
 }
 
+/** Hatchback: el techo sigue hasta atrás y cae en un portalón casi vertical. */
+function hatchCabin(s: Shape) {
+  s.moveTo(0.6, 0.93)
+  s.lineTo(0.02, 1.36)
+  s.quadraticCurveTo(-0.1, 1.42, -0.3, 1.42)
+  s.lineTo(-1.3, 1.41)
+  s.quadraticCurveTo(-1.6, 1.4, -1.76, 1.24)
+  s.lineTo(-2.06, 0.99)
+  s.lineTo(-2.06, 0.93)
+  s.closePath()
+}
+
 const FRONT_WINDOW: P2[] = [
   [0.5, 0.99],
   [0.03, 1.34],
@@ -89,6 +101,20 @@ const REAR_WINDOW: P2[] = [
   [-1.15, 1.31],
   [-1.64, 1.0],
 ]
+const HATCH_REAR_WINDOW: P2[] = [
+  [-0.49, 0.99],
+  [-0.49, 1.375],
+  [-1.3, 1.37],
+  [-1.55, 1.33],
+  [-1.74, 1.15],
+  [-1.84, 0.99],
+]
+
+type BodyKind = 'sedan' | 'hatch'
+const SHAPES: Record<BodyKind, { cabin: (s: Shape) => void; rearWindow: P2[]; rearGlass: [P2, P2] }> = {
+  sedan: { cabin, rearWindow: REAR_WINDOW, rearGlass: [[-1.22, 1.32], [-1.8, 0.99]] },
+  hatch: { cabin: hatchCabin, rearWindow: HATCH_REAR_WINDOW, rearGlass: [[-1.77, 1.23], [-2.05, 1.0]] },
+}
 
 /** Panel de vidrio sobre un tramo inclinado del perfil (parabrisas, luneta). */
 function SlopeGlass({ a, b, width }: { a: P2; b: P2; width: number }) {
@@ -111,7 +137,7 @@ function SlopeGlass({ a, b, width }: { a: P2; b: P2; width: number }) {
   )
 }
 
-function CarBody() {
+function CarBody({ kind }: { kind: BodyKind }) {
   const opacity = useStore((s) => s.bodyOpacity)
   const color = useStore((s) => CARS[s.car].paint)
   const paint = useMemo(() => {
@@ -122,11 +148,11 @@ function CarBody() {
   const geos = useMemo(
     () => ({
       lower: extrudeProfile(lowerBody, 1.76, 0.07, true),
-      cabin: extrudeProfile(cabin, 1.46, 0.05, true),
+      cabin: extrudeProfile(SHAPES[kind].cabin, 1.46, 0.05, true),
       frontWin: extrudeProfile(polygon(FRONT_WINDOW), 1.49, 0),
-      rearWin: extrudeProfile(polygon(REAR_WINDOW), 1.49, 0),
+      rearWin: extrudeProfile(polygon(SHAPES[kind].rearWindow), 1.49, 0),
     }),
-    [],
+    [kind],
   )
   return (
     <Part id="carroceria" explode={[0, 1.9, 0]} opacity={opacity} section="shell">
@@ -135,7 +161,7 @@ function CarBody() {
       <mesh geometry={geos.frontWin} material={M.windowGlass} />
       <mesh geometry={geos.rearWin} material={M.windowGlass} />
       <SlopeGlass a={[0.6, 0.93]} b={[0.02, 1.36]} width={1.3} />
-      <SlopeGlass a={[-1.22, 1.32]} b={[-1.8, 0.99]} width={1.24} />
+      <SlopeGlass a={SHAPES[kind].rearGlass[0]} b={SHAPES[kind].rearGlass[1]} width={1.24} />
       {[-1, 1].map((s) => (
         <group key={s}>
           <mesh position={[2.23, 0.64, s * 0.58]} rotation={[0, 0, -0.35]} material={M.headlight}>
@@ -196,10 +222,10 @@ function Interior() {
   )
 }
 
-export function Body() {
+export function Body({ kind = 'sedan' }: { kind?: BodyKind }) {
   return (
     <>
-      <CarBody />
+      <CarBody kind={kind} />
       <Interior />
     </>
   )

@@ -84,10 +84,15 @@ interface PartProps {
   section?: SectionStyle | 'translucent'
   /** Opacidad forzada (ej. carrocería en modo rayos X). */
   opacity?: number
+  /**
+   * Cuánto más allá del eje (en metros, alejándose de la cámara) pasa el corte. Sirve para carcasas
+   * cuyo contenido no está en el eje, como el transeje: así se ven enteros los dos ejes.
+   */
+  sectionDepth?: number
   children: ReactNode
 }
 
-export function Part({ id, explode = [0, 0, 0], cutaway = false, section, opacity, children }: PartProps) {
+export function Part({ id, explode = [0, 0, 0], cutaway = false, section, opacity, sectionDepth = 0, children }: PartProps) {
   const ref = useRef<Group>(null)
   const camera = useThree((s) => s.camera)
   const system = PARTS[id].system
@@ -157,6 +162,7 @@ export function Part({ id, explode = [0, 0, 0], cutaway = false, section, opacit
       cutAxis.set(0, 0, 1).transformDirection(g.parent.matrixWorld)
       cutPoint.set(0, 0, explode[2] * t).applyMatrix4(g.parent.matrixWorld)
       const side = toCamera.subVectors(camera.position, cutPoint).dot(cutAxis) >= 0 ? -1 : 1
+      if (sectionDepth) cutPoint.addScaledVector(cutAxis, side * sectionDepth)
       plane.setFromNormalAndCoplanarPoint(cutAxis.multiplyScalar(side), cutPoint)
     }
   })

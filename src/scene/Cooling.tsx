@@ -5,22 +5,31 @@ import { sim } from '../sim'
 import { Part, type V3 } from './Part'
 import { FlowDots, Pipe, Spinner, curveThrough } from './helpers'
 import { M } from './materials'
-import { DECK_Y } from './layout'
+import { DECK_Y, engineToWorld, type EngineLayout } from './layout'
 
 const RAD_X = 1.86
 const RAD = { y0: 0.32, y1: 0.68, z: 0.3 }
 const FAN = { x: 1.79, y: 0.5, r: 0.15 }
 
-const UPPER_HOSE: V3[] = [
-  [1.48, DECK_Y + 0.08, 0.06],
-  [1.62, DECK_Y + 0.12, 0.14],
-  [RAD_X - 0.03, RAD.y1 + 0.02, 0.22],
-]
-const LOWER_HOSE: V3[] = [
-  [RAD_X - 0.03, RAD.y0 - 0.02, -0.22],
-  [1.68, 0.36, -0.2],
-  [1.5, 0.55, -0.16],
-]
+/** Salida del termostato y entrada de la bomba de agua, en coordenadas del conjunto motor. */
+const THERMOSTAT: V3 = [1.48, DECK_Y + 0.08, 0.06]
+const PUMP_INLET: V3 = [1.5, 0.555, -0.16]
+
+/** Mangueras: van del motor (esté como esté montado) al radiador, que siempre va adelante. */
+function hoses(layout: EngineLayout): { upper: V3[]; lower: V3[] } {
+  const thermostat = engineToWorld(layout, THERMOSTAT)
+  const pump = engineToWorld(layout, PUMP_INLET)
+  if (layout === 'transversal') {
+    return {
+      upper: [thermostat, [1.65, 0.76, -0.3], [RAD_X - 0.03, RAD.y1 + 0.02, -0.22]],
+      lower: [[RAD_X - 0.03, RAD.y0 - 0.02, 0.22], [1.7, 0.3, -0.3], [1.35, 0.33, -0.46], [1.29, 0.5, -0.44], [pump[0], pump[1], pump[2] - 0.02]],
+    }
+  }
+  return {
+    upper: [thermostat, [1.62, DECK_Y + 0.12, 0.14], [RAD_X - 0.03, RAD.y1 + 0.02, 0.22]],
+    lower: [[RAD_X - 0.03, RAD.y0 - 0.02, -0.22], [1.68, 0.36, -0.2], pump],
+  }
+}
 
 const FINS = 36
 
@@ -76,9 +85,10 @@ function Fan() {
   )
 }
 
-function Hoses() {
-  const upper = useMemo(() => curveThrough(UPPER_HOSE), [])
-  const lower = useMemo(() => curveThrough(LOWER_HOSE), [])
+function Hoses({ layout }: { layout: EngineLayout }) {
+  const { upper: UPPER_HOSE, lower: LOWER_HOSE } = useMemo(() => hoses(layout), [layout])
+  const upper = useMemo(() => curveThrough(UPPER_HOSE), [UPPER_HOSE])
+  const lower = useMemo(() => curveThrough(LOWER_HOSE), [LOWER_HOSE])
   return (
     <Part id="mangueras" explode={[0.5, 0.4, 0]} cutaway section="translucent">
       <Pipe points={UPPER_HOSE} r={0.017} material={M.hose} />
@@ -92,12 +102,12 @@ function Hoses() {
   )
 }
 
-export function Cooling() {
+export function Cooling({ layout = 'longitudinal' }: { layout?: EngineLayout }) {
   return (
     <>
       <Radiator />
       <Fan />
-      <Hoses />
+      <Hoses layout={layout} />
     </>
   )
 }

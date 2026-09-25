@@ -38,3 +38,39 @@ export function pinY(theta: number) {
   const s = CRANK_R * Math.sin(theta)
   return CRANK_Y + CRANK_R * Math.cos(theta) + Math.sqrt(ROD_L * ROD_L - s * s)
 }
+
+// ── Disposición del conjunto motor ─────────────────────────────
+// El motor, el embrague y la caja se modelan en coordenadas propias (cigüeñal
+// a lo largo de X local). Cada disposición ubica y gira ese conjunto en el auto.
+
+type P3 = [number, number, number]
+export type EngineLayout = 'longitudinal' | 'transversal'
+
+export const ENGINE_FRAMES: Record<EngineLayout, { position: P3; rotationY: number }> = {
+  longitudinal: { position: [0, 0, 0], rotationY: 0 },
+  // Girado 90°: cigüeñal a lo ancho del auto, escape hacia adelante y transeje a la derecha
+  transversal: { position: [1.45, 0, 1.13], rotationY: Math.PI / 2 },
+}
+
+/** Punto del conjunto motor (coordenadas propias) en coordenadas del auto. */
+export function engineToWorld(layout: EngineLayout, [x, y, z]: P3): P3 {
+  const f = ENGINE_FRAMES[layout]
+  const c = Math.cos(f.rotationY)
+  const s = Math.sin(f.rotationY)
+  return [f.position[0] + x * c + z * s, f.position[1] + y, f.position[2] - x * s + z * c]
+}
+
+/** Dirección del conjunto motor en coordenadas del auto (para encuadrar la cámara). */
+export function engineDirToWorld(layout: EngineLayout, [x, y, z]: P3): P3 {
+  const r = ENGINE_FRAMES[layout].rotationY
+  return [x * Math.cos(r) + z * Math.sin(r), y, -x * Math.sin(r) + z * Math.cos(r)]
+}
+
+// ── Transeje (tracción delantera), en coordenadas del conjunto motor ─────
+export const TA_INPUT = { y: CRANK_Y, z: 0 } // coaxial con el cigüeñal
+export const TA_OUTPUT = { y: 0.408, z: -0.099 } // a 0,1 m del primario
+export const TA_GEAR_X = [0, 0.66, 0.71, 0.76, 0.81, 0.86] // por marcha
+export const TA_FINAL_X = 0.925 // piñón de ataque, junto a la campana
+export const TA_RING_R = 0.082
+/** Diferencial delantero, en coordenadas del auto (sobre el eje de las ruedas delanteras). */
+export const FRONT_DIFF: P3 = [FRONT_AXLE_X, WHEEL_Y, ENGINE_FRAMES.transversal.position[2] - TA_FINAL_X]

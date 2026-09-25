@@ -36,7 +36,8 @@ export interface Tour {
   steps: TourStep[]
 }
 
-const CICLO_OCULTOS: SystemId[] = ['escape', 'ruedas', 'suspension', 'frenos']
+// Refrigeración oculta: con motor transversal, el radiador tapa la vista del motor
+const CICLO_OCULTOS: SystemId[] = ['escape', 'ruedas', 'suspension', 'frenos', 'refrigeracion']
 const MOTOR: string[] = ['bloque', 'culata', 'tapa-valvulas']
 
 export const TOURS: Tour[] = [
@@ -52,7 +53,7 @@ export const TOURS: Tour[] = [
         title: 'Un motor cortado por la mitad',
         text: 'Cortamos el auto y el motor a lo largo para ver adentro. Los cuatro pistones suben y bajan en sus cilindros; el color de cada cámara indica en qué tiempo está.',
         hidden: [...CICLO_OCULTOS, 'electrico'],
-        view: { frame: [...MOTOR, 'carter'], dir: [0.5, 0.45, 1] },
+        view: { frame: [...MOTOR, 'carter'], dir: [0.5, 0.45, 1], engineSpace: true },
       },
       {
         title: 'Admisión',
@@ -60,14 +61,14 @@ export const TOURS: Tour[] = [
         select: 'valvulas',
         state: { slow: 0.02 },
         hidden: [...CICLO_OCULTOS, 'electrico'],
-        view: { frame: MOTOR, dir: [0.25, 0.35, 1], zoom: 0.95 },
+        view: { frame: MOTOR, dir: [0.25, 0.35, 1], zoom: 0.95, engineSpace: true },
       },
       {
         title: 'Compresión y chispa',
         text: 'Las válvulas se cierran y el pistón sube apretando la mezcla (azul). Al llegar arriba, la bujía hace saltar la chispa: el destello amarillo.',
         select: 'bujias',
         state: { slow: 0.02 },
-        view: { frame: MOTOR, dir: [0.2, 0.75, 1], zoom: 0.95 },
+        view: { frame: MOTOR, dir: [0.2, 0.75, 1], zoom: 0.95, engineSpace: true },
       },
       {
         title: 'Explosión',
@@ -75,7 +76,7 @@ export const TOURS: Tour[] = [
         select: 'pistones',
         state: { slow: 0.02 },
         hidden: [...CICLO_OCULTOS, 'electrico'],
-        view: { frame: ['bloque'], dir: [0.3, 0.2, 1], zoom: 1.05 },
+        view: { frame: ['bloque'], dir: [0.3, 0.2, 1], zoom: 1.05, engineSpace: true },
       },
       {
         title: 'Escape',
@@ -83,14 +84,14 @@ export const TOURS: Tour[] = [
         select: 'arbol-levas-escape',
         state: { slow: 0.02 },
         hidden: [...CICLO_OCULTOS, 'electrico'],
-        view: { frame: ['culata', 'tapa-valvulas'], dir: [0.35, 0.6, 1], zoom: 1.05 },
+        view: { frame: ['culata', 'tapa-valvulas'], dir: [0.35, 0.6, 1], zoom: 1.05, engineSpace: true },
       },
       {
         title: 'Del sube y baja al giro',
         text: 'Las bielas transforman el movimiento de los pistones en giro del cigüeñal. Con el orden de encendido 1-3-4-2, siempre hay un cilindro empujando.',
         select: 'ciguenal',
         hidden: [...CICLO_OCULTOS, 'electrico', 'carroceria'],
-        view: { frame: ['ciguenal', 'bloque'], dir: [0.35, 0.1, 1], zoom: 1.0 },
+        view: { frame: ['ciguenal', 'bloque'], dir: [0.35, 0.1, 1], zoom: 1.0, engineSpace: true },
       },
     ],
   },
@@ -98,7 +99,7 @@ export const TOURS: Tour[] = [
     id: 'transmision',
     name: 'Del motor a las ruedas',
     blurb: 'El camino de la fuerza hasta el asfalto',
-    requires: ['manual-longitudinal', 'traccion-trasera'],
+    requires: ['caja-manual', 'traccion-trasera'],
     base: { interior: 'seccion', rpm: 1500, slow: 0.05, gear: 1 },
     hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'suspension', 'frenos'],
     steps: [
@@ -160,7 +161,7 @@ export const TOURS: Tour[] = [
         title: 'Bomba de agua',
         text: 'La correa del motor mueve la bomba, que empuja el refrigerante por los conductos del bloque y la culata.',
         select: 'bomba-agua',
-        view: { frame: ['bomba-agua', 'correa-accesorios'], dir: [0.3, 1, -0.6], zoom: 1.4 },
+        view: { frame: ['bomba-agua', 'correa-accesorios'], dir: [0.3, 1, -0.6], zoom: 1.4, engineSpace: true },
       },
       {
         title: 'Sale caliente',
@@ -179,6 +180,49 @@ export const TOURS: Tour[] = [
         text: 'Si el auto va lento o está detenido no entra suficiente aire, así que el electroventilador lo empuja a través del radiador.',
         select: 'ventilador',
         view: { frame: ['ventilador', 'radiador'], dir: [-0.7, 0.55, 0.7], zoom: 1.0 },
+      },
+    ],
+  },
+  {
+    id: 'traccion-delantera',
+    name: 'Tracción delantera',
+    blurb: 'Motor atravesado y todo adelante',
+    requires: ['caja-manual', 'traccion-delantera'],
+    base: { interior: 'seccion', rpm: 1500, slow: 0.05, gear: 2 },
+    hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'suspension', 'frenos'],
+    steps: [
+      {
+        title: 'Todo en la parte delantera',
+        text: 'El motor va atravesado, con el cigüeñal a lo ancho del auto. A su lado va el transeje, que junta caja y diferencial, y dos semiejes llevan el giro a las ruedas delanteras. No hay cardán: el piso queda plano y el auto es más corto.',
+        view: { frame: ['bloque', 'transeje', 'semiejes-delanteros'], dir: [0.55, 0.9, 0.7], zoom: 0.85 },
+      },
+      {
+        title: 'Transeje: solo dos ejes',
+        text: 'El primario (unido al embrague) y el secundario engranan directo, sin eje intermediario. El collar dorado bloquea la 2ª marcha, y en el extremo del secundario un piñón mueve la corona del diferencial.',
+        select: 'transeje-ejes',
+        hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'suspension', 'frenos', 'ruedas'],
+        view: { frame: ['transeje'], dir: [1, 0.45, 0.45], zoom: 0.95 },
+      },
+      {
+        title: 'Diferencial delantero',
+        text: 'La corona dorada gira con las ruedas y reparte el giro entre los dos semiejes. En una curva, la rueda de afuera gira más rápido que la de adentro.',
+        select: 'diferencial-delantero',
+        hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'suspension', 'frenos', 'ruedas'],
+        view: { frame: ['diferencial-delantero', 'transeje'], dir: [1, 0.35, -0.25], zoom: 1.0 },
+      },
+      {
+        title: 'Juntas homocinéticas',
+        text: 'Bajo cada fuelle negro hay una junta que transmite el giro aunque el semieje esté en ángulo: la rueda gira para doblar y sube y baja con la suspensión, sin tirones.',
+        select: 'semiejes-delanteros',
+        hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'ruedas'],
+        view: { frame: ['semiejes-delanteros'], dir: [1, 0.3, 0.25], zoom: 0.75 },
+      },
+      {
+        title: 'Atrás, solo acompañan',
+        text: 'Las ruedas traseras no reciben fuerza del motor, así que basta un eje de torsión simple: dos brazos unidos por una viga que se tuerce.',
+        select: 'suspension-trasera-torsion',
+        hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'frenos'],
+        view: { frame: ['suspension-trasera-torsion'], dir: [-0.6, 0.8, 0.8], zoom: 0.9 },
       },
     ],
   },

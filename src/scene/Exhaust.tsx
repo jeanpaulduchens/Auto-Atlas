@@ -3,7 +3,7 @@ import { RoundedBox } from '@react-three/drei'
 import { Part, type V3 } from './Part'
 import { FlowDots, Pipe, curveThrough } from './helpers'
 import { M } from './materials'
-import { CYL_X, DECK_Y } from './layout'
+import { CYL_X, DECK_Y, engineToWorld, type EngineLayout } from './layout'
 
 export const EXHAUST_COLLECTOR: V3 = [1.2, 0.46, 0.2]
 const COLLECTOR = EXHAUST_COLLECTOR
@@ -16,12 +16,20 @@ const UNDERBODY: V3[] = [
   [-1.95, 0.22, 0.3],
   [-2.3, 0.22, 0.3],
 ]
-/** Atmosférico: el tubo parte en el colector del múltiple. */
-const PIPE_NA: V3[] = [COLLECTOR, [1.12, 0.3, 0.2], [0.95, 0.2, 0.2], ...UNDERBODY]
+/** Atmosférico: el tubo parte en el colector del múltiple (que se mueve con el motor). */
+function pipeNA(layout: EngineLayout): V3[] {
+  if (layout === 'transversal') {
+    const c = engineToWorld(layout, COLLECTOR)
+    // El múltiple da hacia adelante: el tubo baja frente al motor y pasa por debajo
+    return [c, [c[0] + 0.01, 0.3, c[2] + 0.02], [c[0] - 0.05, 0.2, c[2] + 0.05], [1.2, 0.2, 0.05], [0.8, 0.2, 0.15], ...UNDERBODY]
+  }
+  return [COLLECTOR, [1.12, 0.3, 0.2], [0.95, 0.2, 0.2], ...UNDERBODY]
+}
 /** Turbo: parte a la salida de la turbina (downpipe). */
 const PIPE_TURBO: V3[] = [[1.06, 0.48, 0.3], [0.98, 0.36, 0.27], [0.9, 0.22, 0.22], ...UNDERBODY]
 
-function Manifold() {
+/** Múltiple de escape: en coordenadas del conjunto motor (va dentro de su marco). */
+export function Manifold() {
   return (
     <Part id="multiple-escape" explode={[0, 0.1, 0.5]}>
       {CYL_X.map((x) => (
@@ -56,8 +64,8 @@ function Catalyst() {
   )
 }
 
-function PipeAndMuffler({ turbo }: { turbo: boolean }) {
-  const pipe = turbo ? PIPE_TURBO : PIPE_NA
+function PipeAndMuffler({ turbo, layout }: { turbo: boolean; layout: EngineLayout }) {
+  const pipe = useMemo(() => (turbo ? PIPE_TURBO : pipeNA(layout)), [turbo, layout])
   const curve = useMemo(() => curveThrough(pipe), [pipe])
   return (
     <Part id="silenciador" explode={[0, -0.1, 0.55]} cutaway section="translucent">
@@ -68,12 +76,12 @@ function PipeAndMuffler({ turbo }: { turbo: boolean }) {
   )
 }
 
-export function Exhaust({ turbo = false }: { turbo?: boolean }) {
+/** Catalizador, tubo y silenciador (el múltiple va con el motor). */
+export function Exhaust({ turbo = false, layout = 'longitudinal' }: { turbo?: boolean; layout?: EngineLayout }) {
   return (
     <>
-      <Manifold />
       <Catalyst />
-      <PipeAndMuffler turbo={turbo} />
+      <PipeAndMuffler turbo={turbo} layout={layout} />
     </>
   )
 }
