@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { SYSTEM_ORDER, type SystemId } from './data/parts'
+import { CARS, type CarId } from './cars'
 
 export type V3 = [number, number, number]
 
@@ -10,6 +11,7 @@ export type Interior = 'cerrado' | 'translucido' | 'seccion'
 export type Quality = 'alta' | 'rapida'
 
 export interface AppState {
+  car: CarId
   explode: number
   bodyOpacity: number
   interior: Interior
@@ -36,6 +38,7 @@ export interface AppState {
   panelCollapsed: boolean
   set: (patch: Partial<AppState>) => void
   toggleLabels: () => void
+  setCar: (car: CarId) => void
   select: (id: string | null, focus?: boolean) => void
   toggleSystem: (id: SystemId) => void
   focus: () => void
@@ -85,7 +88,10 @@ function saveLabels(on: boolean) {
 
 export const noneHidden = () => Object.fromEntries(SYSTEM_ORDER.map((s) => [s, false])) as Record<SystemId, boolean>
 
+const carParam = params.get('auto') as CarId | null
+
 export const useStore = create<AppState>((set) => ({
+  car: carParam && carParam in CARS ? carParam : 'sedan',
   explode: num('explode', 0),
   bodyOpacity: num('body', 1),
   interior: interiorParam && INTERIORS.includes(interiorParam) ? interiorParam : 'translucido',
@@ -107,6 +113,18 @@ export const useStore = create<AppState>((set) => ({
   view: null,
   panelCollapsed: false,
   set: (patch) => set(patch),
+  setCar: (car) =>
+    set((s) => ({
+      car,
+      gear: 0,
+      clutch: false,
+      selected: null,
+      isolate: false,
+      activeSystem: null,
+      tour: null,
+      hidden: noneHidden(),
+      focusNonce: s.focusNonce + 1,
+    })),
   toggleLabels: () =>
     set((s) => {
       saveLabels(!s.labels)

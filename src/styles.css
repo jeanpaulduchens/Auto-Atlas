@@ -363,6 +363,41 @@ button.link.active {
   flex: none;
 }
 
+/* Selector de versión */
+.versions {
+  display: grid;
+  gap: 6px;
+}
+.version {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 7px 10px;
+}
+.version.active {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.14);
+}
+.version-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+.version-text {
+  display: grid;
+  gap: 1px;
+}
+.version-name {
+  font-weight: 600;
+}
+.version-spec {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* Recorridos: lista en el panel */
 .tours {
   display: grid;

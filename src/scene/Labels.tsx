@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import { Vector3, type Group } from 'three'
-import { PARTS, SYSTEMS, SYSTEM_ORDER, type SystemId } from '../data/parts'
+import { PARTS, SYSTEMS, SYSTEM_ORDER, partInCar, type SystemId } from '../data/parts'
 import { useStore } from '../store'
 import { partAnchor } from './registry'
 
@@ -145,6 +145,7 @@ function useLabelLayout() {
  */
 export function Labels() {
   const enabled = useStore((s) => s.labels)
+  const car = useStore((s) => s.car)
   const exploded = useStore((s) => s.explode >= 0.5)
   const selected = useStore((s) => s.selected)
   const activeSystem = useStore((s) => s.activeSystem)
@@ -170,7 +171,7 @@ export function Labels() {
     return (
       <>
         {Object.entries(PARTS)
-          .filter(([, p]) => p.system === system)
+          .filter(([id, p]) => p.system === system && partInCar(id, car))
           .map(([id, p]) => (
             <Label
               key={id}

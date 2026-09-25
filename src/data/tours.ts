@@ -1,4 +1,5 @@
 import type { SystemId } from './parts'
+import { hasModule, type CarId, type Module } from '../cars'
 import type { CameraView, Interior } from '../store'
 
 export interface TourState {
@@ -28,6 +29,8 @@ export interface Tour {
   id: string
   name: string
   blurb: string
+  /** Módulos que debe tener la versión para ofrecer este recorrido. */
+  requires: Module[]
   base: TourState
   hidden: SystemId[]
   steps: TourStep[]
@@ -41,6 +44,7 @@ export const TOURS: Tour[] = [
     id: 'ciclo',
     name: 'El ciclo de 4 tiempos',
     blurb: 'Qué pasa dentro de cada cilindro',
+    requires: ['combustion'],
     base: { interior: 'seccion', rpm: 900, slow: 0.05, gear: 0 },
     hidden: CICLO_OCULTOS,
     steps: [
@@ -94,6 +98,7 @@ export const TOURS: Tour[] = [
     id: 'transmision',
     name: 'Del motor a las ruedas',
     blurb: 'El camino de la fuerza hasta el asfalto',
+    requires: ['manual-longitudinal', 'traccion-trasera'],
     base: { interior: 'seccion', rpm: 1500, slow: 0.05, gear: 1 },
     hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'suspension', 'frenos'],
     steps: [
@@ -142,6 +147,7 @@ export const TOURS: Tour[] = [
     id: 'refrigeracion',
     name: 'Cómo se enfría el motor',
     blurb: 'El recorrido del refrigerante',
+    requires: ['combustion'],
     base: { interior: 'translucido', rpm: 1500, slow: 0.05, gear: 0 },
     hidden: ['carroceria', 'escape', 'electrico', 'suspension', 'ruedas', 'frenos'],
     steps: [
@@ -176,4 +182,47 @@ export const TOURS: Tour[] = [
       },
     ],
   },
+  {
+    id: 'turbo',
+    name: 'Cómo funciona el turbo',
+    blurb: 'Los gases de escape empujan aire al motor',
+    requires: ['turbo'],
+    base: { interior: 'translucido', rpm: 3000, slow: 0.05, gear: 0 },
+    hidden: ['carroceria', 'suspension', 'ruedas', 'frenos', 'electrico'],
+    steps: [
+      {
+        title: 'Energía que se perdía',
+        text: 'Los gases de escape salen calientes y a presión. El turbo aprovecha esa energía para empujar más aire dentro del motor: más aire permite quemar más combustible.',
+        view: { frame: ['turbo', 'intercooler', 'ductos-turbo', 'bloque'], dir: [0.55, 0.75, 1], zoom: 0.85 },
+      },
+      {
+        title: 'La turbina',
+        text: 'Los gases (naranjos) salen del múltiple de escape y hacen girar la turbina, la rueda de álabes del lado de hierro. Después siguen hacia el catalizador.',
+        select: 'turbo',
+        view: { frame: ['turbo', 'multiple-escape'], dir: [-0.3, 0.55, 1], zoom: 1.0 },
+      },
+      {
+        title: 'El compresor',
+        text: 'Un eje une la turbina con el compresor, del lado de aluminio. El compresor aspira aire fresco del filtro (celeste claro) y lo empuja comprimido. A plena carga, el eje supera las 150.000 rpm.',
+        select: 'turbo',
+        state: { rpm: 4500 },
+        view: { frame: ['turbo'], dir: [1, 0.45, 0.8], zoom: 1.3 },
+      },
+      {
+        title: 'Intercooler',
+        text: 'Al comprimirse, el aire se calienta (naranjo claro). El intercooler lo enfría con el aire que entra por el frente del auto: el aire frío es más denso y trae más oxígeno.',
+        select: 'intercooler',
+        view: { frame: ['intercooler', 'ductos-turbo'], dir: [1, 0.7, 0.5], zoom: 0.8 },
+      },
+      {
+        title: 'De vuelta al motor',
+        text: 'El aire comprimido y enfriado (celeste) llega a la mariposa y al múltiple de admisión. Cada cilindro recibe hasta un 50 % más de aire que en un motor atmosférico.',
+        select: 'ductos-turbo',
+        view: { frame: ['ductos-turbo', 'admision'], dir: [0.5, 0.9, -1], zoom: 0.9 },
+      },
+    ],
+  },
 ]
+
+/** Recorridos disponibles en una versión del auto. */
+export const toursForCar = (car: CarId) => TOURS.filter((t) => t.requires.every((m) => hasModule(car, m)))

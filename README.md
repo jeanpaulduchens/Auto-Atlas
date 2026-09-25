@@ -12,6 +12,10 @@ npm run dev                            # abre http://localhost:5173
 
 ## Cómo se usa
 
+- **Versión** (arriba en el panel, o `?auto=sedan-turbo`): cada versión combina módulos (motor, turbo,
+  caja, tracción) definidos en `src/cars.ts`. Las piezas del catálogo indican a qué módulo pertenecen,
+  y los recorridos, qué módulos necesitan.
+
 - **Interior** (panel → Vista): *Cerrado*, *Translúcido* o *Corte*. El corte parte el auto, el motor y
   la caja por la mitad, con rayado técnico en las caras cortadas.
 - **Desarmar**: separa las piezas y muestra una etiqueta por sistema; al tocar un sistema aparecen
@@ -37,6 +41,7 @@ npm run dev                            # abre http://localhost:5173
 src/
   data/parts.ts      Catálogo de piezas: nombre, sistema y explicación (lo que muestra el panel)
   data/tours.ts      Recorridos guiados: pasos, encuadres y textos
+  cars.ts            Versiones del auto y sus módulos
   sim.ts             Simulación mecánica: ángulos de cigüeñal, caja, ruedas; ciclo de 4 tiempos
   tours.ts           Navegación de los recorridos guiados
   store.ts           Estado de la interfaz (zustand)
@@ -51,6 +56,7 @@ src/
     Drivetrain.tsx   Embrague, caja de 5 velocidades, cardán, diferencial
     Cooling.tsx      Radiador, ventilador, mangueras
     Exhaust.tsx      Múltiple, catalizador, silenciador
+    Turbo.tsx        Turbocompresor, intercooler y ductos
     Chassis.tsx      Ruedas, frenos, suspensión, chasis, batería, combustible
     Body.tsx         Carrocería e interior
   ui/                Paneles HTML sobre el canvas
@@ -93,4 +99,5 @@ Fuentes a revisar (siempre verificar la licencia de cada modelo):
 - [x] Recorridos guiados paso a paso
 - [x] Corte de sección y etiquetas sobre las piezas
 - [ ] Carrocería con un modelo `.glb` más realista
-- [ ] Más autos: tracción delantera con motor transversal, eléctrico
+- [x] Versiones de auto: sedán clásico y sedán turbo
+- [ ] Más versiones: tracción delantera transversal, caja automática, eléctrico

@@ -1,3 +1,5 @@
+import { CARS, type CarId, type Module } from '../cars'
+
 export type SystemId =
   | 'carroceria'
   | 'motor'
@@ -33,6 +35,8 @@ export const SYSTEM_ORDER = Object.keys(SYSTEMS) as SystemId[]
 export interface PartInfo {
   name: string
   system: SystemId
+  /** Módulo al que pertenece; sin módulo, la pieza está en todas las versiones. */
+  module?: Module
   summary: string
   how: string[]
   fact?: string
@@ -75,6 +79,7 @@ export const PARTS: Record<string, PartInfo> = {
   bloque: {
     name: 'Bloque del motor',
     system: 'motor',
+    module: 'combustion',
     summary:
       'La pieza principal del motor: un bloque de hierro o aluminio fundido que contiene los cilindros donde se mueven los pistones.',
     how: [
@@ -87,6 +92,7 @@ export const PARTS: Record<string, PartInfo> = {
   culata: {
     name: 'Culata',
     system: 'motor',
+    module: 'combustion',
     summary:
       'Cierra los cilindros por arriba. Contiene las cámaras de combustión, los conductos de admisión y escape y los asientos de las válvulas.',
     how: [
@@ -97,6 +103,7 @@ export const PARTS: Record<string, PartInfo> = {
   'tapa-valvulas': {
     name: 'Tapa de válvulas',
     system: 'motor',
+    module: 'combustion',
     summary: 'Cubre los árboles de levas y las válvulas, y mantiene dentro el aceite que los lubrica.',
     how: [
       'Arriba tiene la tapa de llenado de aceite del motor.',
@@ -106,6 +113,7 @@ export const PARTS: Record<string, PartInfo> = {
   ciguenal: {
     name: 'Cigüeñal',
     system: 'motor',
+    module: 'combustion',
     summary:
       'Convierte el movimiento de sube y baja de los pistones en giro. Es el eje que finalmente mueve las ruedas.',
     how: [
@@ -119,6 +127,7 @@ export const PARTS: Record<string, PartInfo> = {
   pistones: {
     name: 'Pistones',
     system: 'motor',
+    module: 'combustion',
     summary: 'Cilindros de aluminio que suben y bajan dentro del bloque y reciben la fuerza de la combustión.',
     how: [
       'Ciclo de 4 tiempos, en dos vueltas del cigüeñal: admisión (baja y aspira aire y combustible), compresión (sube y comprime), explosión (la chispa enciende la mezcla y lo empuja hacia abajo) y escape (sube y expulsa los gases).',
@@ -130,6 +139,7 @@ export const PARTS: Record<string, PartInfo> = {
   bielas: {
     name: 'Bielas',
     system: 'motor',
+    module: 'combustion',
     summary: 'Barras de acero forjado que unen cada pistón con el cigüeñal.',
     how: [
       'El “pie” de la biela se une al pistón con un bulón y la “cabeza” abraza la muñequilla del cigüeñal.',
@@ -139,6 +149,7 @@ export const PARTS: Record<string, PartInfo> = {
   'arbol-levas-admision': {
     name: 'Árbol de levas de admisión',
     system: 'motor',
+    module: 'combustion',
     summary: 'Eje con levas ovaladas que empujan y abren las válvulas de admisión en el momento exacto.',
     how: [
       'Gira a la mitad de velocidad que el cigüeñal: cada válvula se abre una vez cada dos vueltas del motor.',
@@ -149,6 +160,7 @@ export const PARTS: Record<string, PartInfo> = {
   'arbol-levas-escape': {
     name: 'Árbol de levas de escape',
     system: 'motor',
+    module: 'combustion',
     summary: 'Abre las válvulas de escape para que los gases quemados salgan del cilindro.',
     how: [
       'Igual que el de admisión, gira a la mitad de las rpm del cigüeñal, sincronizado por la correa de distribución.',
@@ -158,6 +170,7 @@ export const PARTS: Record<string, PartInfo> = {
   valvulas: {
     name: 'Válvulas',
     system: 'motor',
+    module: 'combustion',
     summary: 'Tapones en forma de hongo que abren y cierran el paso de la mezcla y de los gases en cada cilindro.',
     how: [
       'Las levas las empujan hacia abajo para abrirlas y un resorte las vuelve a cerrar.',
@@ -168,6 +181,7 @@ export const PARTS: Record<string, PartInfo> = {
   'correa-distribucion': {
     name: 'Correa de distribución',
     system: 'motor',
+    module: 'combustion',
     summary: 'Correa dentada que sincroniza el cigüeñal con los árboles de levas.',
     how: [
       'La polea del cigüeñal es la mitad de grande que las de las levas: relación 2:1.',
@@ -178,6 +192,7 @@ export const PARTS: Record<string, PartInfo> = {
   carter: {
     name: 'Cárter de aceite',
     system: 'motor',
+    module: 'combustion',
     summary: 'Depósito bajo el motor donde se acumula el aceite.',
     how: [
       'La bomba de aceite lo aspira y lo envía a presión a los cojinetes del cigüeñal, las levas y los pistones.',
@@ -187,6 +202,7 @@ export const PARTS: Record<string, PartInfo> = {
   'volante-motor': {
     name: 'Volante de inercia',
     system: 'motor',
+    module: 'combustion',
     summary: 'Disco pesado atornillado al final del cigüeñal que suaviza los pulsos de cada explosión.',
     how: [
       'Por su masa acumula energía y mantiene el giro estable entre una explosión y la siguiente.',
@@ -197,6 +213,7 @@ export const PARTS: Record<string, PartInfo> = {
   admision: {
     name: 'Admisión (filtro y múltiple)',
     system: 'motor',
+    module: 'combustion',
     summary: 'Lleva el aire limpio desde el exterior hasta cada cilindro.',
     how: [
       'El filtro de aire retiene el polvo; la mariposa (conectada al acelerador) regula cuánto aire entra.',
@@ -207,6 +224,7 @@ export const PARTS: Record<string, PartInfo> = {
   'correa-accesorios': {
     name: 'Correa de accesorios',
     system: 'motor',
+    module: 'combustion',
     summary: 'Correa acanalada (poly-V) que toma giro del cigüeñal para mover el alternador y la bomba de agua.',
     how: [
       'En muchos autos también mueve el compresor del aire acondicionado y la bomba de la dirección hidráulica.',
@@ -214,10 +232,48 @@ export const PARTS: Record<string, PartInfo> = {
     ],
   },
 
+  // ── Turbo ─────────────────────────────────────────────────────
+  turbo: {
+    name: 'Turbocompresor',
+    system: 'motor',
+    module: 'turbo',
+    summary:
+      'Usa la energía de los gases de escape para meter más aire al motor. Más aire permite quemar más combustible: más potencia con el mismo tamaño de motor.',
+    how: [
+      'Los gases calientes del escape hacen girar la turbina (lado de hierro, a la izquierda del eje).',
+      'La turbina está unida por un eje al compresor (lado de aluminio), que aspira aire fresco y lo empuja comprimido hacia el motor.',
+      'El eje llega a girar a más de 150.000 rpm y flota sobre una película de aceite.',
+      'La válvula de descarga (wastegate) desvía parte de los gases cuando la presión es suficiente, para no sobrealimentar el motor.',
+    ],
+    fact: 'Un motor turbo de 2,0 litros puede rendir como uno atmosférico de 3,0: por eso casi todos los autos nuevos lo usan.',
+  },
+  intercooler: {
+    name: 'Intercooler',
+    system: 'motor',
+    module: 'turbo',
+    summary: 'Radiador de aire: enfría el aire que sale caliente del compresor antes de que entre al motor.',
+    how: [
+      'Al comprimir el aire, este se calienta (puede superar los 120 °C) y el aire caliente es menos denso.',
+      'El intercooler lo enfría con el aire que entra por el frente del auto; así cabe más oxígeno en cada cilindro.',
+      'El aire comprimido entra caliente (puntos naranjo claro) y sale enfriado (puntos celestes) de camino al motor.',
+    ],
+  },
+  'ductos-turbo': {
+    name: 'Ductos de admisión turbo',
+    system: 'motor',
+    module: 'turbo',
+    summary: 'Conducen el aire: del filtro al compresor, del compresor al intercooler y del intercooler a la mariposa.',
+    how: [
+      'Tramo frío: del filtro de aire a la entrada del compresor.',
+      'Tramo presurizado: del compresor al intercooler y de ahí al múltiple de admisión, a 0,5–1,5 bar sobre la presión atmosférica.',
+    ],
+  },
+
   // ── Eléctrico ─────────────────────────────────────────────────
   bujias: {
     name: 'Bujías',
     system: 'electrico',
+    module: 'combustion',
     summary: 'Hacen saltar la chispa que enciende la mezcla de aire y combustible dentro de cada cilindro.',
     how: [
       'La bobina eleva los 12 V de la batería a entre 20.000 y 40.000 V.',
@@ -238,6 +294,7 @@ export const PARTS: Record<string, PartInfo> = {
   alternador: {
     name: 'Alternador',
     system: 'electrico',
+    module: 'combustion',
     summary: 'Generador que produce electricidad mientras el motor gira y recarga la batería.',
     how: [
       'La correa de accesorios lo hace girar 2 a 3 veces más rápido que el cigüeñal, por su polea más pequeña.',
@@ -249,6 +306,7 @@ export const PARTS: Record<string, PartInfo> = {
   estanque: {
     name: 'Estanque y línea de combustible',
     system: 'combustible',
+    module: 'combustion',
     summary: 'Almacena la gasolina y la envía al motor.',
     how: [
       'Dentro del estanque hay una bomba eléctrica sumergida que empuja el combustible por la línea a unos 3–4 bar.',
@@ -258,6 +316,7 @@ export const PARTS: Record<string, PartInfo> = {
   inyeccion: {
     name: 'Riel e inyectores',
     system: 'combustible',
+    module: 'combustion',
     summary: 'Pulverizan la gasolina en cada conducto de admisión, en la cantidad justa.',
     how: [
       'El riel reparte el combustible a presión a los 4 inyectores.',
@@ -270,6 +329,7 @@ export const PARTS: Record<string, PartInfo> = {
   radiador: {
     name: 'Radiador',
     system: 'refrigeracion',
+    module: 'combustion',
     summary: 'Intercambiador de calor que enfría el líquido refrigerante con el aire que pasa por el frente del auto.',
     how: [
       'El refrigerante caliente entra por arriba y baja por decenas de tubos delgados rodeados de aletas de aluminio.',
@@ -280,6 +340,7 @@ export const PARTS: Record<string, PartInfo> = {
   ventilador: {
     name: 'Electroventilador',
     system: 'refrigeracion',
+    module: 'combustion',
     summary: 'Empuja aire a través del radiador cuando el auto va lento o está detenido.',
     how: [
       'Un sensor de temperatura lo enciende cuando el refrigerante supera unos 95 °C.',
@@ -289,6 +350,7 @@ export const PARTS: Record<string, PartInfo> = {
   'bomba-agua': {
     name: 'Bomba de agua',
     system: 'refrigeracion',
+    module: 'combustion',
     summary: 'Bomba centrífuga que hace circular el refrigerante entre el motor y el radiador.',
     how: [
       'La mueve la correa de accesorios, así que funciona siempre que el motor está en marcha.',
@@ -298,6 +360,7 @@ export const PARTS: Record<string, PartInfo> = {
   mangueras: {
     name: 'Mangueras y termostato',
     system: 'refrigeracion',
+    module: 'combustion',
     summary: 'Conectan el motor con el radiador. El termostato decide cuándo el líquido pasa por el radiador.',
     how: [
       'La manguera superior (puntos rojos) lleva el refrigerante caliente del motor al radiador.',
@@ -310,6 +373,7 @@ export const PARTS: Record<string, PartInfo> = {
   embrague: {
     name: 'Embrague',
     system: 'transmision',
+    module: 'manual-longitudinal',
     summary: 'Conecta y desconecta el motor de la caja de cambios.',
     how: [
       'Un disco con material de fricción queda apretado entre el volante y el plato de presión por un resorte de diafragma.',
@@ -320,6 +384,7 @@ export const PARTS: Record<string, PartInfo> = {
   'caja-cambios': {
     name: 'Caja de cambios (carcasa)',
     system: 'transmision',
+    module: 'manual-longitudinal',
     summary: 'Contiene los ejes y engranajes que cambian la relación entre las vueltas del motor y las de las ruedas.',
     how: [
       'Es una caja manual de 5 velocidades. Los engranajes giran bañados en aceite.',
@@ -330,6 +395,7 @@ export const PARTS: Record<string, PartInfo> = {
   'eje-primario': {
     name: 'Eje primario (de entrada)',
     system: 'transmision',
+    module: 'manual-longitudinal',
     summary: 'Recibe el giro del motor a través del embrague y lo pasa al eje intermediario.',
     how: [
       'Su engranaje está siempre engranado con el primer engranaje del eje intermediario (engranaje de toma constante).',
@@ -338,6 +404,7 @@ export const PARTS: Record<string, PartInfo> = {
   'eje-intermediario': {
     name: 'Eje intermediario',
     system: 'transmision',
+    module: 'manual-longitudinal',
     summary: 'Eje inferior con un engranaje fijo por cada marcha. Gira siempre que el embrague está suelto.',
     how: [
       'Cada engranaje del intermediario está permanentemente engranado con su pareja del eje secundario.',
@@ -347,6 +414,7 @@ export const PARTS: Record<string, PartInfo> = {
   'eje-secundario': {
     name: 'Eje secundario y sincronizador',
     system: 'transmision',
+    module: 'manual-longitudinal',
     summary: 'Eje de salida hacia el cardán. Sus engranajes giran “locos” hasta que el sincronizador bloquea uno.',
     how: [
       'Todos los engranajes del secundario giran siempre, cada uno a su velocidad, pero libres sobre el eje.',
@@ -357,6 +425,7 @@ export const PARTS: Record<string, PartInfo> = {
   palanca: {
     name: 'Palanca de cambios',
     system: 'transmision',
+    module: 'manual-longitudinal',
     summary: 'Mueve las horquillas que desplazan los sincronizadores dentro de la caja.',
     how: [
       'Patrón en H: izquierda-derecha elige la horquilla y adelante-atrás la mueve.',
@@ -366,6 +435,7 @@ export const PARTS: Record<string, PartInfo> = {
   cardan: {
     name: 'Cardán (eje de transmisión)',
     system: 'transmision',
+    module: 'traccion-trasera',
     summary: 'Tubo que lleva el giro desde la caja de cambios hasta el diferencial trasero.',
     how: [
       'En cada extremo tiene una junta universal (cruceta) que le permite girar en ángulo.',
@@ -376,6 +446,7 @@ export const PARTS: Record<string, PartInfo> = {
   diferencial: {
     name: 'Diferencial',
     system: 'transmision',
+    module: 'traccion-trasera',
     summary: 'Gira el movimiento 90° hacia las ruedas, lo reduce y permite que cada rueda gire a distinta velocidad en las curvas.',
     how: [
       'El piñón (pequeño) mueve la corona (grande): una reducción final de 3,9 a 1.',
@@ -386,12 +457,14 @@ export const PARTS: Record<string, PartInfo> = {
   'puente-trasero': {
     name: 'Puente trasero',
     system: 'transmision',
+    module: 'traccion-trasera',
     summary: 'Carcasa rígida que contiene el diferencial y los semiejes. También forma parte de la suspensión trasera.',
     how: ['Por dentro está lleno en parte con aceite de engranajes para lubricar la corona y el piñón.'],
   },
   semiejes: {
     name: 'Semiejes (palieres)',
     system: 'transmision',
+    module: 'traccion-trasera',
     summary: 'Ejes que llevan el giro desde el diferencial hasta cada rueda trasera.',
     how: ['Se conectan a los engranajes planetarios del diferencial por un extremo y al buje de la rueda por el otro.'],
   },
@@ -400,6 +473,7 @@ export const PARTS: Record<string, PartInfo> = {
   'multiple-escape': {
     name: 'Múltiple de escape',
     system: 'escape',
+    module: 'combustion',
     summary: 'Recoge los gases calientes que salen de cada cilindro y los junta en un solo tubo.',
     how: [
       'Los gases salen a más de 800 °C: por eso suele ser de hierro fundido o de acero inoxidable.',
@@ -409,6 +483,7 @@ export const PARTS: Record<string, PartInfo> = {
   catalizador: {
     name: 'Catalizador',
     system: 'escape',
+    module: 'combustion',
     summary: 'Convierte los gases más tóxicos del escape en gases menos dañinos.',
     how: [
       'Dentro tiene un panal cerámico recubierto de platino, paladio y rodio.',
@@ -418,6 +493,7 @@ export const PARTS: Record<string, PartInfo> = {
   silenciador: {
     name: 'Tubo de escape y silenciador',
     system: 'escape',
+    module: 'combustion',
     summary: 'Conduce los gases hacia atrás y reduce el ruido de las explosiones.',
     how: [
       'El silenciador tiene cámaras y deflectores que hacen chocar entre sí las ondas de sonido para anularlas.',
@@ -439,6 +515,7 @@ export const PARTS: Record<string, PartInfo> = {
   'suspension-trasera': {
     name: 'Suspensión trasera de eje rígido',
     system: 'suspension',
+    module: 'traccion-trasera',
     summary: 'Resortes, amortiguadores y brazos que unen el puente trasero con el chasis.',
     how: [
       'Como las dos ruedas van unidas por el puente, lo que le pasa a una afecta a la otra. Es un sistema simple y muy resistente.',
@@ -469,4 +546,10 @@ export const PARTS: Record<string, PartInfo> = {
       'Con una marcha puesta y el embrague suelto, las ruedas traseras giran: mira la velocidad en el panel.',
     ],
   },
+}
+
+/** ¿La pieza forma parte de esta versión del auto? */
+export const partInCar = (id: string, car: CarId) => {
+  const m = PARTS[id]?.module
+  return !m || CARS[car].modules.includes(m)
 }

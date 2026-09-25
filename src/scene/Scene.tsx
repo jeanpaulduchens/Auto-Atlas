@@ -3,7 +3,8 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { ContactShadows, OrbitControls } from '@react-three/drei'
 import { Box3, NeutralToneMapping, Sphere, Vector3, type PerspectiveCamera } from 'three'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
-import { FINAL_DRIVE, GEAR_RATIOS, TAU, sim } from '../sim'
+import { TAU, sim } from '../sim'
+import { CARS, hasModule } from '../cars'
 import { useStore, type CameraView } from '../store'
 import { partBounds, systemBounds } from './registry'
 import { Labels } from './Labels'
@@ -17,6 +18,7 @@ import { Cooling } from './Cooling'
 import { Drivetrain } from './Drivetrain'
 import { Engine } from './Engine'
 import { Exhaust } from './Exhaust'
+import { Turbo } from './Turbo'
 
 const HOME = { target: new Vector3(-0.3, 0.6, 0.4), position: new Vector3(4.6, 2.6, 5.6) }
 
@@ -49,11 +51,14 @@ function SimDriver() {
     if (!s.running) return
     const dCrank = (s.rpm / 60) * TAU * s.slow * dt
     const dInput = s.clutch ? 0 : dCrank
-    const dOutput = s.gear > 0 ? dInput / GEAR_RATIOS[s.gear] : 0
+    const car = CARS[s.car]
+    const dOutput = s.gear > 0 ? dInput / car.gears[s.gear] : 0
     sim.crank += dCrank
     sim.input += dInput
     sim.output += dOutput
-    sim.wheel += dOutput / FINAL_DRIVE
+    sim.wheel += dOutput / car.finalDrive
+    // El turbo gira mucho más rápido que el motor y acelera con las rpm (más gases de escape)
+    if (hasModule(s.car, 'turbo')) sim.turbo += dCrank * 6 * Math.min(2.5, Math.max(0.35, s.rpm / 2500))
     sim.fan += (1800 / 60) * TAU * s.slow * dt
   })
   return null
@@ -150,7 +155,8 @@ function GroundShadow() {
   const [live, setLive] = useState(false)
   const [version, setVersion] = useState(0)
   const hidden = useStore((s) => s.hidden)
-  useEffect(() => setVersion((v) => v + 1), [hidden])
+  const car = useStore((s) => s.car)
+  useEffect(() => setVersion((v) => v + 1), [hidden, car])
   useFrame(() => {
     const moving = Math.abs(useStore.getState().explode - sim.explode) > 1e-3
     if (moving === live) return
@@ -170,6 +176,29 @@ function GroundShadow() {
       far={2}
       resolution={512}
     />
+  )
+}
+
+/** Arma el auto con los módulos de la versión elegida. */
+function CarModules() {
+  const car = useStore((s) => s.car)
+  const has = (m: Parameters<typeof hasModule>[1]) => hasModule(car, m)
+  const turbo = has('turbo')
+  return (
+    // key: al cambiar de versión se montan piezas nuevas (materiales, anclas de etiquetas, sombra)
+    <group key={car}>
+      {has('combustion') && (
+        <>
+          <Engine turbo={turbo} />
+          <Cooling />
+          <Exhaust turbo={turbo} />
+        </>
+      )}
+      {turbo && <Turbo />}
+      {has('manual-longitudinal') && has('traccion-trasera') && <Drivetrain />}
+      <Chassis />
+      <Body />
+    </group>
   )
 }
 
@@ -195,12 +224,7 @@ export function Scene() {
       <StudioLights />
 
       <SimDriver />
-      <Engine />
-      <Drivetrain />
-      <Cooling />
-      <Exhaust />
-      <Chassis />
-      <Body />
+      <CarModules />
       <Labels />
 
       <GroundShadow />

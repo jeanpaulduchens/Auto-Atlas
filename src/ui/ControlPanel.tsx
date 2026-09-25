@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { PARTS, SYSTEMS, SYSTEM_ORDER, type SystemId } from '../data/parts'
-import { CYLINDERS, FINAL_DRIVE, GEAR_RATIOS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
+import { PARTS, SYSTEMS, SYSTEM_ORDER, partInCar, type SystemId } from '../data/parts'
+import { CYLINDERS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
+import { CARS, CAR_ORDER } from '../cars'
 import { useStore, type Interior, type Quality } from '../store'
-import { TOURS } from '../data/tours'
+import { toursForCar } from '../data/tours'
 import { endTour, goToStep } from '../tours'
 
 const SPEEDS = [
@@ -48,7 +49,8 @@ function SystemRow({ id }: { id: SystemId }) {
   const selected = useStore((s) => s.selected)
   const toggle = useStore((s) => s.toggleSystem)
   const select = useStore((s) => s.select)
-  const parts = Object.entries(PARTS).filter(([, p]) => p.system === id)
+  const car = useStore((s) => s.car)
+  const parts = Object.entries(PARTS).filter(([pid, p]) => p.system === id && partInCar(pid, car))
   return (
     <div className="system">
       <div className="system-head">
@@ -85,13 +87,41 @@ const INTERIOR: { value: Interior; label: string }[] = [
   { value: 'seccion', label: 'Corte' },
 ]
 
+function Versions() {
+  const car = useStore((s) => s.car)
+  const setCar = useStore((s) => s.setCar)
+  return (
+    <section>
+      <h2>Versión</h2>
+      <div className="versions" role="radiogroup" aria-label="Versión del auto">
+        {CAR_ORDER.map((id) => (
+          <button
+            key={id}
+            role="radio"
+            aria-checked={car === id}
+            className={`version ${car === id ? 'active' : ''}`}
+            onClick={() => car !== id && setCar(id)}
+          >
+            <span className="version-swatch" style={{ background: CARS[id].paint }} />
+            <span className="version-text">
+              <span className="version-name">{CARS[id].name}</span>
+              <span className="version-spec">{CARS[id].spec}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function Tours() {
   const tour = useStore((s) => s.tour)
+  const car = useStore((s) => s.car)
   return (
     <section>
       <h2>Recorridos</h2>
       <div className="tours">
-        {TOURS.map((t) => {
+        {toursForCar(car).map((t) => {
           const active = tour?.id === t.id
           return (
             <button
@@ -129,7 +159,8 @@ export function ControlPanel() {
   useLabelsShortcut()
   const collapsed = s.panelCollapsed
   const setCollapsed = (v: boolean) => s.set({ panelCollapsed: v })
-  const wheelRpm = s.running && !s.clutch && s.gear > 0 ? s.rpm / GEAR_RATIOS[s.gear] / FINAL_DRIVE : 0
+  const car = CARS[s.car]
+  const wheelRpm = s.running && !s.clutch && s.gear > 0 ? s.rpm / car.gears[s.gear] / car.finalDrive : 0
   const kmh = (wheelRpm * TAU * WHEEL_RADIUS * 60) / 1000
 
   return (
@@ -146,6 +177,8 @@ export function ControlPanel() {
 
       {!collapsed && (
         <div className="scroll">
+          <Versions />
+
           <Tours />
 
           <section>
@@ -249,14 +282,14 @@ export function ControlPanel() {
                 <b>{wheelRpm.toFixed(0)}</b> rpm rueda
               </div>
               <div>
-                <b>{s.gear > 0 ? (GEAR_RATIOS[s.gear] * FINAL_DRIVE).toFixed(1) : '–'}</b> : 1 total
+                <b>{s.gear > 0 ? (car.gears[s.gear] * car.finalDrive).toFixed(1) : '–'}</b> : 1 total
               </div>
             </div>
           </section>
 
           <section>
             <h2>Sistemas y piezas</h2>
-            {SYSTEM_ORDER.map((id) => (
+            {SYSTEM_ORDER.filter((id) => Object.entries(PARTS).some(([pid, p]) => p.system === id && partInCar(pid, s.car))).map((id) => (
               <SystemRow key={id} id={id} />
             ))}
           </section>

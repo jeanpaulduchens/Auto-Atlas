@@ -1,8 +1,6 @@
 export const TAU = Math.PI * 2
 
-/** Relaciones de la caja (índice 0 = neutro). */
-export const GEAR_RATIOS = [0, 3.54, 2.13, 1.36, 1.0, 0.82]
-export const FINAL_DRIVE = 3.9
+// Las relaciones de caja y diferencial dependen de la versión: ver cars.ts
 export const WHEEL_RADIUS = 0.31
 
 /**
@@ -16,6 +14,7 @@ export const sim = {
   output: 0, // eje secundario / cardán
   wheel: 0, // ruedas traseras (y delanteras, rodando)
   fan: 0,
+  turbo: 0, // eje del turbo (turbina + compresor)
   explode: +(new URLSearchParams(window.location.search).get('explode') ?? 0) || 0, // interpolado hacia el del store
 }
 

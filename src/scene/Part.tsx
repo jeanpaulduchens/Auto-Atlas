@@ -9,6 +9,9 @@ import { registerPart } from './registry'
 export type V3 = [number, number, number]
 
 const WHITE = new Color('#ffffff')
+const cutAxis = new Vector3()
+const cutPoint = new Vector3()
+const toCamera = new Vector3()
 const HOVER_COLOR = new Color('#f59e0b')
 const CUTAWAY_OPACITY = 0.2
 const GHOST_OPACITY = 0.06
@@ -145,12 +148,16 @@ export function Part({ id, explode = [0, 0, 0], cutaway = false, section, opacit
   useFrame(() => {
     const t = sim.explode
     ref.current?.position.set(explode[0] * t, explode[1] * t, explode[2] * t)
-    if (sectioned) {
-      // Corta por el eje longitudinal de la pieza y quita siempre la mitad que da a la cámara
-      const cz = explode[2] * t
-      const s = camera.position.z >= cz ? -1 : 1
-      plane.normal.set(0, 0, s)
-      plane.constant = -s * cz
+    const g = ref.current
+    if (sectioned && g?.parent) {
+      // Corta por el plano vertical que contiene el eje longitudinal (X local) del conjunto al que
+      // pertenece la pieza, y quita siempre la mitad que da a la cámara. En un motor transversal,
+      // X local es el cigüeñal, así que el corte sigue mostrando los cuatro cilindros.
+      g.parent.updateWorldMatrix(true, false)
+      cutAxis.set(0, 0, 1).transformDirection(g.parent.matrixWorld)
+      cutPoint.set(0, 0, explode[2] * t).applyMatrix4(g.parent.matrixWorld)
+      const side = toCamera.subVectors(camera.position, cutPoint).dot(cutAxis) >= 0 ? -1 : 1
+      plane.setFromNormalAndCoplanarPoint(cutAxis.multiplyScalar(side), cutPoint)
     }
   })
 

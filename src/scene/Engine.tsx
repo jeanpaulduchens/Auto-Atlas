@@ -419,8 +419,14 @@ function Flywheel() {
   )
 }
 
-function Intake() {
-  const plenum: [number, number, number] = [1.25, DECK_Y - 0.01, -0.24]
+const PLENUM: [number, number, number] = [1.25, DECK_Y - 0.01, -0.24]
+/** Mariposa (cuerpo de aceleración) y caja del filtro de aire: el turbo se conecta a ellos. */
+export const THROTTLE: [number, number, number] = [1.5, PLENUM[1], PLENUM[2]]
+export const AIR_FILTER: [number, number, number] = [1.62, PLENUM[1] + 0.02, -0.44]
+
+/** Con turbo, el filtro alimenta al compresor y la mariposa recibe el aire del intercooler. */
+function Intake({ turbo }: { turbo: boolean }) {
+  const plenum = PLENUM
   return (
     <Part id="admision" explode={[0, 0.3, -0.5]}>
       {CYL_X.map((x) => (
@@ -438,24 +444,26 @@ function Intake() {
       <mesh position={plenum} rotation={[0, 0, Math.PI / 2]} material={M.aluminum}>
         <cylinderGeometry args={[0.035, 0.035, 0.46, 20]} />
       </mesh>
-      <mesh position={[1.5, plenum[1], plenum[2]]} rotation={[0, 0, Math.PI / 2]} material={M.darkSteel}>
+      <mesh position={THROTTLE} rotation={[0, 0, Math.PI / 2]} material={M.darkSteel}>
         <cylinderGeometry args={[0.03, 0.03, 0.04, 20]} />
       </mesh>
-      <Pipe
-        points={[
-          [1.52, plenum[1], plenum[2]],
-          [1.58, plenum[1] + 0.02, -0.3],
-          [1.62, plenum[1] + 0.02, -0.36],
-        ]}
-        r={0.028}
-        material={M.hose}
-      />
-      <RoundedBox args={[0.22, 0.09, 0.2]} radius={0.015} position={[1.62, plenum[1] + 0.02, -0.44]} material={M.black} />
+      {!turbo && (
+        <Pipe
+          points={[
+            [1.52, plenum[1], plenum[2]],
+            [1.58, plenum[1] + 0.02, -0.3],
+            [1.62, plenum[1] + 0.02, -0.36],
+          ]}
+          r={0.028}
+          material={M.hose}
+        />
+      )}
+      <RoundedBox args={[0.22, 0.09, 0.2]} radius={0.015} position={AIR_FILTER} material={M.black} />
     </Part>
   )
 }
 
-export function Engine() {
+export function Engine({ turbo = false }: { turbo?: boolean }) {
   return (
     <>
       <Block />
@@ -474,7 +482,7 @@ export function Engine() {
       <Alternator />
       <WaterPump />
       <Flywheel />
-      <Intake />
+      <Intake turbo={turbo} />
     </>
   )
 }

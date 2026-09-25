@@ -2,7 +2,8 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { BoxGeometry, Quaternion, Vector3, type Group } from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { GEAR_RATIOS, sim } from '../sim'
+import { sim } from '../sim'
+import { CARS } from '../cars'
 import { useStore } from '../store'
 import { Part, type V3 } from './Part'
 import { Beam, Gear, Spinner } from './helpers'
@@ -23,8 +24,11 @@ const INPUT_GEAR_X = 0.77
 const CASE = { x0: 0.3, x1: 0.83, y0: 0.25, y1: 0.55 }
 
 /** Radios de la pareja de engranajes de cada marcha (salida / intermediario). */
-function gearPair(n: number) {
-  const R = GEAR_RATIOS[n]
+/** Relaciones de la caja de la versión elegida (índice 0 = neutro). */
+const useGears = () => useStore((s) => CARS[s.car].gears)
+
+function gearPair(gears: number[], n: number) {
+  const R = gears[n]
   return { out: (GEAR_CENTER_DIST * R) / (1 + R), counter: GEAR_CENTER_DIST / (1 + R) }
 }
 
@@ -90,6 +94,7 @@ function InputShaft() {
 }
 
 function Countershaft() {
+  const gears = useGears()
   return (
     <Part id="eje-intermediario" explode={[0, -0.18, 0]}>
       <Spinner angle={() => -sim.input} position={[0, GEARBOX_COUNTER_Y, 0]}>
@@ -98,7 +103,7 @@ function Countershaft() {
         </mesh>
         <Gear radius={0.05} material={M.darkSteel} position={[INPUT_GEAR_X, 0, 0]} />
         {MARCHAS.map((n) => (
-          <Gear key={n} radius={gearPair(n).counter} material={M.darkSteel} position={[GEAR_X[n], 0, 0]} />
+          <Gear key={n} radius={gearPair(gears, n).counter} material={M.darkSteel} position={[GEAR_X[n], 0, 0]} />
         ))}
       </Spinner>
     </Part>
@@ -107,6 +112,7 @@ function Countershaft() {
 
 function OutputShaft() {
   const gear = useStore((s) => s.gear)
+  const gears = useGears()
   const sleeve = useRef<Group>(null)
   useFrame((_, dt) => {
     const g = sleeve.current
@@ -125,8 +131,8 @@ function OutputShaft() {
       </Spinner>
       {/* Engranajes locos: cada uno gira a input / relación, bloqueado o no */}
       {MARCHAS.map((n) => (
-        <Spinner key={n} angle={() => sim.input / GEAR_RATIOS[n]} position={[0, CRANK_Y, 0]}>
-          <Gear radius={gearPair(n).out} material={n === gear ? M.gold : M.steel} position={[GEAR_X[n], 0, 0]} />
+        <Spinner key={n} angle={() => sim.input / gears[n]} position={[0, CRANK_Y, 0]}>
+          <Gear radius={gearPair(gears, n).out} material={n === gear ? M.gold : M.steel} position={[GEAR_X[n], 0, 0]} />
         </Spinner>
       ))}
       <group ref={sleeve} position={[GEAR_X[2] + 0.035, CRANK_Y, 0]}>

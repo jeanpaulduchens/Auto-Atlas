@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { ExtrudeGeometry, Shape, type BufferGeometry } from 'three'
 import { mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useStore } from '../store'
+import { CARS } from '../cars'
 import { Part } from './Part'
 import { M } from './materials'
 import { FRONT_AXLE_X, REAR_AXLE_X } from './layout'
@@ -112,6 +113,12 @@ function SlopeGlass({ a, b, width }: { a: P2; b: P2; width: number }) {
 
 function CarBody() {
   const opacity = useStore((s) => s.bodyOpacity)
+  const color = useStore((s) => CARS[s.car].paint)
+  const paint = useMemo(() => {
+    const m = M.paint.clone()
+    m.color.set(color)
+    return m
+  }, [color])
   const geos = useMemo(
     () => ({
       lower: extrudeProfile(lowerBody, 1.76, 0.07, true),
@@ -123,8 +130,8 @@ function CarBody() {
   )
   return (
     <Part id="carroceria" explode={[0, 1.9, 0]} opacity={opacity} section="shell">
-      <mesh geometry={geos.lower} material={M.paint} />
-      <mesh geometry={geos.cabin} material={M.paint} />
+      <mesh geometry={geos.lower} material={paint} />
+      <mesh geometry={geos.cabin} material={paint} />
       <mesh geometry={geos.frontWin} material={M.windowGlass} />
       <mesh geometry={geos.rearWin} material={M.windowGlass} />
       <SlopeGlass a={[0.6, 0.93]} b={[0.02, 1.36]} width={1.3} />
