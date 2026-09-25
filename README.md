@@ -63,6 +63,14 @@ el modo aislar, la explosión y el enfoque de la cámara funcionan solos.
 **Para animarla:** lee los ángulos de `sim` (`sim.crank`, `sim.output`, `sim.wheel`…) dentro de un
 `useFrame`, o usa `<Spinner angle={() => ...}>`.
 
+## Publicación
+
+La app es estática: `npm run build` genera `dist/` (HTML, CSS y JS, con las librerías incluidas) y
+no necesita servidor. Se publica sola en **GitHub Pages** en cada push a `main`
+(`.github/workflows/pages.yml`); en las demás ramas el flujo solo compila, para detectar errores.
+
+Sitio: https://jeanpaulduchens.github.io/Auto-Atlas/
+
 ## Modelos 3D
 
 Por ahora todas las piezas son **procedurales** (generadas por código). Así las animaciones son exactas
