@@ -288,7 +288,7 @@ export const PARTS: Record<string, PartInfo> = {
     how: [
       'Es de plomo-ácido: seis celdas de 2,1 V en serie.',
       'Al arrancar entrega de 300 a 600 amperes al motor de arranque durante unos segundos.',
-      'Con el motor funcionando, el alternador la recarga.',
+      'Con el motor funcionando, el alternador la recarga. En un auto eléctrico, la recarga un conversor desde la batería de tracción.',
     ],
   },
   alternador: {
@@ -600,6 +600,82 @@ export const PARTS: Record<string, PartInfo> = {
     how: [
       'En P, un trinquete bloquea el eje de salida para que el auto no se mueva.',
       'Un cable la une a la caja, que va adelante junto al motor.',
+    ],
+  },
+
+  // ── Eléctrico ─────────────────────────────────────────────────
+  'bateria-traccion': {
+    name: 'Batería de tracción',
+    system: 'electrico',
+    module: 'electrica',
+    summary: 'Cientos de celdas de ion-litio agrupadas en módulos bajo el piso. Guardan la energía que mueve el auto.',
+    how: [
+      'Las celdas (azules) se conectan en serie y en paralelo hasta llegar a unos 400 V de corriente continua.',
+      'Va en el piso, entre los ejes: el peso queda bajo y centrado, y el auto se vuelca menos en las curvas.',
+      'Un sistema de gestión (BMS) vigila la temperatura y la carga de cada módulo, y la batería tiene su propio circuito de refrigeración.',
+    ],
+    fact: 'Una batería de 60 kWh guarda la energía de unos 7 litros de gasolina, pero el motor eléctrico la aprovecha 3 veces mejor.',
+  },
+  inversor: {
+    name: 'Inversor',
+    system: 'electrico',
+    module: 'electrica',
+    summary: 'Convierte la corriente continua de la batería en corriente alterna trifásica para el motor, y controla su velocidad y su fuerza.',
+    how: [
+      'Transistores de potencia se encienden y apagan miles de veces por segundo para “fabricar” las tres fases del motor.',
+      'Los cables naranjos son de alta tensión: el color es obligatorio para advertir a mecánicos y rescatistas.',
+      'Al frenar funciona al revés: el motor actúa como generador y el inversor devuelve energía a la batería (frenado regenerativo).',
+      'Un conversor aparte baja la tensión a 12 V para las luces y la batería auxiliar, en lugar de un alternador.',
+    ],
+  },
+  'motor-electrico': {
+    name: 'Motor eléctrico',
+    system: 'motor',
+    module: 'electrica',
+    summary: 'Reemplaza al motor a combustión: sin pistones, válvulas ni explosiones. Tiene una sola pieza que gira: el rotor.',
+    how: [
+      'El estátor (por fuera) tiene bobinas de cobre; al pasar corriente alterna se forma un campo magnético que gira. Mira cómo se iluminan en secuencia.',
+      'El rotor tiene imanes permanentes (rojo norte, azul sur) que persiguen ese campo giratorio y hacen girar el eje.',
+      'Entrega toda su fuerza desde cero rpm: por eso los eléctricos aceleran tan rápido desde detenidos.',
+      'Gira hasta unas 16.000 rpm y convierte en movimiento más del 90 % de la energía (un motor a gasolina, cerca del 30 %).',
+    ],
+  },
+  reductora: {
+    name: 'Reductora y diferencial',
+    system: 'transmision',
+    module: 'electrica',
+    summary: 'Una “caja” de una sola marcha: baja las rpm del motor unas 9 veces y reparte el giro entre las ruedas.',
+    how: [
+      'Primera etapa: el piñón del motor mueve el engranaje grande del eje intermedio (3:1).',
+      'Segunda etapa: el engranaje chico del eje intermedio mueve la corona del diferencial (3:1 otra vez, 9:1 en total).',
+      'No necesita marchas: el motor eléctrico da fuerza a cualquier velocidad. La marcha atrás se logra haciendo girar el motor al revés.',
+    ],
+  },
+  'semiejes-traseros': {
+    name: 'Semiejes traseros',
+    system: 'transmision',
+    module: 'electrica',
+    summary: 'Llevan el giro del diferencial a cada rueda trasera, con juntas homocinéticas que siguen el movimiento de la suspensión.',
+    how: ['Como la suspensión trasera es independiente, cada rueda sube y baja por su cuenta y el semieje trabaja en ángulo.'],
+  },
+  'suspension-trasera-independiente': {
+    name: 'Suspensión trasera independiente',
+    system: 'suspension',
+    module: 'electrica',
+    summary: 'Cada rueda trasera tiene sus propios brazos, resorte y amortiguador: un bache en una no afecta a la otra.',
+    how: [
+      'Los brazos superior e inferior guían la rueda; el resorte y el amortiguador controlan el movimiento.',
+      'Da más comodidad y agarre que un eje rígido, y deja espacio al motor y la reductora entre las ruedas.',
+    ],
+  },
+  'puerto-carga': {
+    name: 'Puerto de carga',
+    system: 'electrico',
+    module: 'electrica',
+    summary: 'Donde se conecta el cable para cargar la batería.',
+    how: [
+      'En corriente alterna (en casa) un cargador dentro del auto convierte la energía; en corriente continua (carga rápida) va directo a la batería.',
+      'Una carga rápida lleva la batería del 10 al 80 % en unos 30 minutos.',
     ],
   },
 

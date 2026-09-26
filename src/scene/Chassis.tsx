@@ -138,11 +138,32 @@ function RearTorsionBeam() {
   )
 }
 
+/** Suspensión trasera independiente (eléctrico): brazos por rueda, resorte y amortiguador. */
+function RearIndependent() {
+  const x = REAR_AXLE_X
+  return (
+    <>
+      {[-1, 1].map((s) => (
+        <Part key={s} id="suspension-trasera-independiente" explode={[0, 0.15, s * 0.3]}>
+          <mesh position={[x, WHEEL_Y, s * 0.64]} material={M.castIron}>
+            <boxGeometry args={[0.07, 0.16, 0.04]} />
+          </mesh>
+          <Beam a={[x, 0.24, s * 0.63]} b={[x - 0.2, 0.27, s * 0.3]} r={0.013} material={M.black} />
+          <Beam a={[x, 0.24, s * 0.63]} b={[x + 0.18, 0.27, s * 0.32]} r={0.013} material={M.black} />
+          <Beam a={[x, 0.39, s * 0.63]} b={[x - 0.05, 0.45, s * 0.38]} r={0.012} material={M.black} />
+          <Coil radius={0.045} height={0.24} turns={6} wire={0.006} material={M.red} position={[x - 0.14, 0.33, s * 0.52]} />
+          <Beam a={[x - 0.14, 0.3, s * 0.52]} b={[x - 0.16, 0.66, s * 0.5]} r={0.014} material={M.darkSteel} />
+        </Part>
+      ))}
+    </>
+  )
+}
+
 /**
  * Chasis de escalera. En tracción delantera los largueros suben adelante para
  * pasar por encima del transeje, y los soportes del motor cambian de lugar.
  */
-function Frame({ layout }: { layout: EngineLayout }) {
+function Frame({ layout, mounts }: { layout: EngineLayout; mounts: boolean }) {
   const transversal = layout === 'transversal'
   return (
     <Part id="chasis" explode={[0, -0.28, 0]}>
@@ -174,7 +195,7 @@ function Frame({ layout }: { layout: EngineLayout }) {
       ) : (
         <>
           <Beam a={[1.7, 0.36, -0.45]} b={[1.7, 0.36, 0.45]} r={0.025} box material={M.darkSteel} />
-          <EngineMounts />
+          {mounts && <EngineMounts />}
         </>
       )}
     </Part>
@@ -239,16 +260,21 @@ export function Injection() {
   )
 }
 
-export function Chassis({ layout, rear }: { layout: EngineLayout; rear: 'rigido' | 'torsion' }) {
+export type RearSuspensionKind = 'rigido' | 'torsion' | 'independiente'
+
+/** combustion: soportes del motor y estanque de combustible (no los lleva un eléctrico). */
+export function Chassis({ layout, rear, combustion }: { layout: EngineLayout; rear: RearSuspensionKind; combustion: boolean }) {
   return (
     <>
       <Wheels />
       <Brakes />
       <FrontSuspension />
-      {rear === 'rigido' ? <RearSuspension /> : <RearTorsionBeam />}
-      <Frame layout={layout} />
+      {rear === 'rigido' && <RearSuspension />}
+      {rear === 'torsion' && <RearTorsionBeam />}
+      {rear === 'independiente' && <RearIndependent />}
+      <Frame layout={layout} mounts={combustion} />
       <Battery layout={layout} />
-      <FuelTank layout={layout} />
+      {combustion && <FuelTank layout={layout} />}
     </>
   )
 }

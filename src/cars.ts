@@ -6,7 +6,7 @@
 
 import type { EngineLayout } from './scene/layout'
 
-export type CarId = 'sedan' | 'sedan-turbo' | 'compacto' | 'compacto-automatico'
+export type CarId = 'sedan' | 'sedan-turbo' | 'compacto' | 'compacto-automatico' | 'electrico'
 
 /** Grupos de piezas que se agregan o quitan según la versión. */
 export type Module =
@@ -16,6 +16,7 @@ export type Module =
   | 'caja-automatica' // convertidor de par, tren planetario, frenos y embragues hidráulicos
   | 'traccion-trasera' // caja longitudinal, cardán, diferencial y puente trasero
   | 'traccion-delantera' // transeje, semiejes con juntas homocinéticas y eje trasero de torsión
+  | 'electrica' // batería de tracción, inversor, motor eléctrico y reductora (tracción trasera)
 
 export interface CarConfig {
   id: CarId
@@ -29,6 +30,8 @@ export interface CarConfig {
   /** Relaciones de la caja por marcha (índice 0 = neutro). */
   gears: number[]
   finalDrive: number
+  /** Tope del control de rpm (por defecto 6.500). */
+  maxRpm?: number
 }
 
 const MANUAL_5 = [0, 3.54, 2.13, 1.36, 1.0, 0.82]
@@ -87,6 +90,18 @@ export const CARS: Record<CarId, CarConfig> = {
     paint: '#b4531a',
     gears: AUTO_4,
     finalDrive: 3.6,
+  },
+  electrico: {
+    id: 'electrico',
+    name: 'Eléctrico',
+    spec: 'Tracción trasera · 1 marcha · motor eléctrico',
+    modules: ['electrica'],
+    layout: 'longitudinal',
+    body: 'sedan',
+    paint: '#dfe4ea',
+    gears: [0, 1], // una sola relación: la reductora
+    finalDrive: 9,
+    maxRpm: 16000,
   },
 }
 

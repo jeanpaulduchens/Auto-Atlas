@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { createContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber'
 import { Color, DoubleSide, Plane, Vector3, type Group, type Material, type Mesh, type MeshStandardMaterial, type Side } from 'three'
 import { PARTS } from '../data/parts'
@@ -7,6 +7,9 @@ import { sim } from '../sim'
 import { registerPart } from './registry'
 
 export type V3 = [number, number, number]
+
+/** Id de la pieza que contiene a un componente (lo usan las partículas de flujo para ocultarse al aislar otra). */
+export const PartContext = createContext<string | null>(null)
 
 const WHITE = new Color('#ffffff')
 const cutAxis = new Vector3()
@@ -189,7 +192,7 @@ export function Part({ id, explode = [0, 0, 0], cutaway = false, section, opacit
 
   return (
     <group ref={ref} visible={!hidden} onPointerOver={onOver} onPointerOut={onOut} onClick={onClick}>
-      {children}
+      <PartContext.Provider value={id}>{children}</PartContext.Provider>
     </group>
   )
 }

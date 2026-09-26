@@ -162,7 +162,8 @@ export function ControlPanel() {
   const setCollapsed = (v: boolean) => s.set({ panelCollapsed: v })
   const car = CARS[s.car]
   const automatic = car.modules.includes('caja-automatica')
-  const engaged = automatic || !s.clutch
+  const electric = car.modules.includes('electrica')
+  const engaged = automatic || electric || !s.clutch
   const slip = automatic ? converterRatio(s.gear, s.rpm) : 1
   const wheelRpm = s.running && engaged && s.gear > 0 ? (s.rpm * slip) / car.gears[s.gear] / car.finalDrive : 0
   const kmh = (wheelRpm * TAU * WHEEL_RADIUS * 60) / 1000
@@ -241,7 +242,7 @@ export function ControlPanel() {
           </section>
 
           <section>
-            <h2>Motor</h2>
+            <h2>{electric ? 'Motor eléctrico' : 'Motor'}</h2>
             <div className="btns">
               <button className={s.running ? 'on' : ''} onClick={() => s.set({ running: !s.running })}>
                 {s.running ? '■ Apagar' : '▶ Encender'}
@@ -249,7 +250,14 @@ export function ControlPanel() {
             </div>
             <label className="row">
               <span>{s.rpm} rpm</span>
-              <input type="range" min={700} max={6500} step={50} value={s.rpm} onChange={(e) => s.set({ rpm: +e.target.value })} />
+              <input
+                type="range"
+                min={electric ? 0 : 700}
+                max={car.maxRpm ?? 6500}
+                step={50}
+                value={s.rpm}
+                onChange={(e) => s.set({ rpm: +e.target.value })}
+              />
             </label>
             <div className="row">
               <span>Cámara lenta</span>
@@ -261,19 +269,21 @@ export function ControlPanel() {
                 ))}
               </div>
             </div>
-            <CycleReadout />
+            {!electric && <CycleReadout />}
           </section>
 
           <section>
-            <h2>{automatic ? 'Caja automática' : 'Caja de cambios'}</h2>
+            <h2>{electric ? 'Reductora' : automatic ? 'Caja automática' : 'Caja de cambios'}</h2>
             <div className="seg gears">
               {car.gears.map((_, i) => (
                 <button key={i} className={s.gear === i ? 'on' : ''} onClick={() => s.set({ gear: i })}>
-                  {i === 0 ? 'N' : automatic ? `D${i}` : i}
+                  {i === 0 ? 'N' : electric ? 'D' : automatic ? `D${i}` : i}
                 </button>
               ))}
             </div>
-            {automatic ? (
+            {electric ? (
+              <p className="note">Una sola relación (9:1): el motor eléctrico no necesita marchas.</p>
+            ) : automatic ? (
               <p className="note">En D la caja cambia sola; aquí eliges qué marcha ver. Colores: dorado recibe el giro, rojo frenado, azul entrega.</p>
             ) : (
               <div className="btns">

@@ -60,6 +60,7 @@ src/
     Turbo.tsx        Turbocompresor, intercooler y ductos
     FrontDrive.tsx   Tracción delantera: transeje, diferencial delantero, semiejes homocinéticos
     AutoTransmission.tsx  Caja automática: convertidor de par, tren planetario, frenos y embragues
+    Electric.tsx     Eléctrico: batería de tracción, inversor, motor, reductora y puerto de carga
     Chassis.tsx      Ruedas, frenos, suspensión, chasis, batería, combustible
     Body.tsx         Carrocería e interior
   ui/                Paneles HTML sobre el canvas
@@ -102,5 +103,4 @@ Fuentes a revisar (siempre verificar la licencia de cada modelo):
 - [x] Recorridos guiados paso a paso
 - [x] Corte de sección y etiquetas sobre las piezas
 - [ ] Carrocería con un modelo `.glb` más realista
-- [x] Versiones de auto: sedán clásico, sedán turbo, compacto manual y compacto automático
-- [ ] Más versiones: eléctrico
+- [x] Versiones de auto: sedán clásico, sedán turbo, compacto manual, compacto automático y eléctrico

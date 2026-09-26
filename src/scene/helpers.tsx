@@ -1,4 +1,4 @@
-import { useMemo, useRef, type ReactNode } from 'react'
+import { useContext, useMemo, useRef, type ReactNode } from 'react'
 import { useFrame } from '@react-three/fiber'
 import {
   BoxGeometry,
@@ -18,7 +18,7 @@ import {
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useStore } from '../store'
 import { TAU, mod } from '../sim'
-import type { V3 } from './Part'
+import { PartContext, type V3 } from './Part'
 
 const Y_AXIS = new Vector3(0, 1, 0)
 
@@ -252,11 +252,13 @@ export function FlowDots({
 }) {
   const ref = useRef<InstancedMesh>(null)
   const t = useRef(0)
+  const partId = useContext(PartContext)
   useFrame((_, dt) => {
     const mesh = ref.current
     if (!mesh) return
     const s = useStore.getState()
-    mesh.visible = s.running
+    const ghosted = s.isolate && s.selected !== null && s.selected !== partId
+    mesh.visible = s.running && !ghosted
     if (!s.running) return
     const factor = Math.min(6, Math.max(0.15, (s.rpm / 1000) * (s.slow / 0.05)))
     t.current += Math.min(dt, 0.05) * speed * factor

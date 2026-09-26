@@ -9,11 +9,11 @@ import { partAnchor } from './registry'
 /** Pieza sobre la que se ancla la etiqueta de cada sistema (la primera que exista en la versión). */
 const SYSTEM_ANCHOR: Record<SystemId, string[]> = {
   carroceria: ['carroceria'],
-  motor: ['culata'],
-  electrico: ['bateria'],
+  motor: ['culata', 'motor-electrico'],
+  electrico: ['bateria-traccion', 'bateria'],
   combustible: ['estanque'],
   refrigeracion: ['radiador'],
-  transmision: ['caja-cambios', 'transeje', 'caja-automatica'],
+  transmision: ['caja-cambios', 'transeje', 'caja-automatica', 'reductora'],
   escape: ['silenciador'],
   suspension: ['suspension-delantera'],
   frenos: ['frenos'],
@@ -190,7 +190,7 @@ export function Labels() {
 
   return (
     <>
-      {SYSTEM_ORDER.filter((s) => !hidden[s]).map((s) => (
+      {SYSTEM_ORDER.filter((s) => !hidden[s] && SYSTEM_ANCHOR[s].some((id) => partInCar(id, car))).map((s) => (
         <Label
           key={s}
           labelKey={`sistema-${s}`}

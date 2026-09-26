@@ -145,18 +145,19 @@ function bootGeometry(length: number, big: number, small: number, folds = 5) {
 const OUTER_Z = 0.64
 const BOOT_L = 0.075
 
-export function FrontHalfShafts() {
+/** Semiejes con juntas homocinéticas, del diferencial (en carrierZ) a las ruedas del eje en axleX. */
+export function CvHalfShafts({ id, axleX, carrierZ }: { id: string; axleX: number; carrierZ: number }) {
   const boot = useMemo(() => bootGeometry(BOOT_L, 0.034, 0.016), [])
   return (
     <>
       {[-1, 1].map((s) => {
-        const inner = CARRIER_Z + s * 0.03 // sale del planetario del diferencial
+        const inner = carrierZ + s * 0.03 // sale del planetario del diferencial
         const outer = s * OUTER_Z
         const a = inner + s * (0.015 + BOOT_L)
         const b = outer - s * (0.02 + BOOT_L)
         return (
-          <Part key={s} id="semiejes-delanteros" explode={[0, 0, s * 0.22]}>
-            <Spinner angle={() => -sim.wheel} axis="z" position={[FRONT_AXLE_X, WHEEL_Y, 0]}>
+          <Part key={s} id={id} explode={[0, 0, s * 0.22]}>
+            <Spinner angle={() => -sim.wheel} axis="z" position={[axleX, WHEEL_Y, 0]}>
               {/* Junta interior: vaso metálico + fuelle hacia afuera */}
               <mesh position={[0, 0, inner]} rotation={[Math.PI / 2, 0, 0]} material={M.steel}>
                 <cylinderGeometry args={[0.034, 0.034, 0.03, 20]} />
@@ -177,4 +178,8 @@ export function FrontHalfShafts() {
       })}
     </>
   )
+}
+
+export function FrontHalfShafts() {
+  return <CvHalfShafts id="semiejes-delanteros" axleX={FRONT_AXLE_X} carrierZ={CARRIER_Z} />
 }

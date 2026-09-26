@@ -21,6 +21,7 @@ import { Engine } from './Engine'
 import { Exhaust, Manifold } from './Exhaust'
 import { FrontDifferential, FrontHalfShafts, TransaxleCase, TransaxleShafts } from './FrontDrive'
 import { AutoTransaxle, Selector } from './AutoTransmission'
+import { ElectricDrive } from './Electric'
 import { ENGINE_FRAMES, engineDirToWorld } from './layout'
 import { Turbo } from './Turbo'
 
@@ -250,7 +251,12 @@ function CarModules() {
           {automatic && <Selector base={FWD_LEVER_BASE} cable={FWD_SHIFT_CABLES} />}
         </>
       )}
-      <Chassis layout={car.layout} rear={rwd ? 'rigido' : 'torsion'} />
+      {has('electrica') && <ElectricDrive />}
+      <Chassis
+        layout={car.layout}
+        rear={has('electrica') ? 'independiente' : rwd ? 'rigido' : 'torsion'}
+        combustion={has('combustion')}
+      />
       <Body kind={car.body} />
     </group>
   )

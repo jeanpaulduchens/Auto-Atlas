@@ -294,6 +294,49 @@ export const TOURS: Tour[] = [
     ],
   },
   {
+    id: 'electrico',
+    name: 'Cómo funciona un eléctrico',
+    blurb: 'Batería, inversor, motor y reductora',
+    requires: ['electrica'],
+    base: { interior: 'seccion', rpm: 4000, slow: 0.05, gear: 1 },
+    hidden: ['carroceria', 'frenos'],
+    steps: [
+      {
+        title: 'Muchas menos piezas',
+        text: 'No hay motor a gasolina, caja de cambios, escape ni estanque. La energía va de la batería (bajo el piso) al inversor y de ahí al motor, que mueve las ruedas traseras a través de una reductora.',
+        view: { frame: ['bateria-traccion', 'motor-electrico', 'reductora'], dir: [0.4, 0.8, 1], zoom: 0.8 },
+      },
+      {
+        title: 'La batería',
+        text: 'Cientos de celdas de ion-litio (azules), agrupadas en módulos, entregan unos 400 V de corriente continua. Van en el piso: el peso queda bajo y centrado.',
+        select: 'bateria-traccion',
+        hidden: ['carroceria', 'frenos', 'suspension'],
+        view: { frame: ['bateria-traccion'], dir: [0.2, 1, 0.6], zoom: 0.85 },
+      },
+      {
+        title: 'El inversor',
+        text: 'Transforma la corriente continua en alterna trifásica y decide cuánta energía mandar al motor. Los cables naranjos son de alta tensión; los puntos amarillos muestran la energía saliendo de la batería.',
+        select: 'inversor',
+        view: { frame: ['inversor', 'motor-electrico'], dir: [0.6, 0.8, -1], zoom: 1.1 },
+      },
+      {
+        title: 'El motor',
+        text: 'Las bobinas de cobre se encienden en secuencia y forman un campo magnético que gira. Los imanes del rotor (rojo y azul) lo persiguen: una sola pieza móvil, sin explosiones.',
+        select: 'motor-electrico',
+        state: { rpm: 1500, slow: 0.05 },
+        isolate: true,
+        // Desde el lado opuesto a la reductora: el corte deja ver bobinas y rotor
+        view: { frame: ['motor-electrico'], dir: [0.3, 0.35, -1], zoom: 1.2 },
+      },
+      {
+        title: 'Reductora y ruedas',
+        text: 'El motor gira muy rápido, así que dos etapas de engranajes bajan las rpm 9 veces antes del diferencial (corona dorada). Al frenar, el motor funciona como generador y devuelve energía a la batería.',
+        select: 'reductora',
+        view: { frame: ['reductora', 'semiejes-traseros'], dir: [0.3, 0.55, 1], zoom: 0.9 },
+      },
+    ],
+  },
+  {
     id: 'turbo',
     name: 'Cómo funciona el turbo',
     blurb: 'Los gases de escape empujan aire al motor',

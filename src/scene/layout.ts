@@ -82,3 +82,11 @@ export const AT_OUTPUT = { y: 0.4196, z: -0.14 }
 export const AT_PLANET_X = 0.8
 export const AT_CONVERTER_X = 0.955
 export const AT_TRANSFER_X = 0.66
+
+// ── Propulsión eléctrica (tracción trasera), en coordenadas del auto ───
+// Motor con su eje paralelo al eje trasero; reductora de dos etapas (3:1 · 3:1).
+export const EV_MOTOR = { x: -1.12, y: 0.34, z0: -0.2, z1: 0.06, r: 0.1 }
+export const EV_IDLER = { x: -1.2, y: 0.47 }
+export const EV_DIFF: P3 = [REAR_AXLE_X, WHEEL_Y, 0.14]
+export const EV_STAGE1_Z = 0.1
+export const EV_PACK = { x0: -0.95, x1: 0.95, y0: 0.13, y1: 0.3, z: 0.6 }
