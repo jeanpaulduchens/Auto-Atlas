@@ -8,6 +8,7 @@ import { MechanicsCard } from './ui/MechanicsCard'
 import { InfoPanel } from './ui/InfoPanel'
 import { TourCard } from './ui/TourCard'
 import { FirstHint, HoverTip } from './ui/HoverTip'
+import { PerfNotice } from './ui/PerfNotice'
 import { useShortcuts } from './ui/controls'
 import { startTourFromUrl } from './tours'
 import './styles.css'
@@ -28,6 +29,7 @@ function App() {
       <MechanicsCard />
       <ViewDock />
       <TourCard />
+      <PerfNotice />
       <FirstHint />
       <HoverTip />
     </>

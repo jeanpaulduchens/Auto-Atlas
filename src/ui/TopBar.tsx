@@ -3,6 +3,7 @@ import { toursForCar } from '../data/tours'
 import { useStore } from '../store'
 import { endTour, goToStep } from '../tours'
 import { Icon, Popover } from './controls'
+import { gpu } from '../scene/AdaptiveQuality'
 
 function CarPicker() {
   const car = useStore((s) => s.car)
@@ -107,14 +108,21 @@ function Help() {
   return (
     <Popover title="Ayuda y atajos" className="icon-btn" align="right" trigger={<Icon name="help" />}>
       {() => (
-        <dl className="help">
-          {HELP.map(([k, v]) => (
-            <div key={k}>
-              <dt>{k}</dt>
-              <dd>{v}</dd>
-            </div>
-          ))}
-        </dl>
+        <>
+          <dl className="help">
+            {HELP.map(([k, v]) => (
+              <div key={k}>
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))}
+          </dl>
+          {/* Para diagnosticar lentitud: qué tarjeta gráfica está usando el navegador */}
+          <p className={`gpu ${gpu.software ? 'bad' : ''}`}>
+            <span>Tarjeta gráfica en uso</span>
+            {gpu.software ? `Ninguna: dibujo por software (${gpu.name})` : gpu.name || 'desconocida'}
+          </p>
+        </>
       )}
     </Popover>
   )

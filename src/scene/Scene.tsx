@@ -9,6 +9,7 @@ import { converterRatio, stepPlanetary } from '../automatic'
 import { useStore, type CameraView } from '../store'
 import { partBounds, systemBounds } from './registry'
 import { Labels } from './Labels'
+import { AdaptiveQuality, handleSoftwareRenderer } from './AdaptiveQuality'
 import { BACKGROUND, StudioFloor, StudioLights } from './Studio'
 
 // El post-procesado va en un archivo aparte que solo se descarga en calidad alta
@@ -283,18 +284,22 @@ function CarModules() {
 export function Scene() {
   const select = useStore((s) => s.select)
   const highQuality = useStore((s) => s.quality === 'alta')
+  const lowRes = useStore((s) => s.lowRes)
+  // El post-procesado cuesta por píxel: en Alta se limita a 1,5× (en Retina serían 4× los píxeles de 1×)
+  const dpr = lowRes ? 1 : Math.min(window.devicePixelRatio, highQuality ? 1.5 : 2)
   const running = useStore((s) => s.running)
   return (
     <Canvas
       frameloop={running ? 'always' : 'demand'}
       camera={{ position: START.position.toArray(), fov: FOV, near: 0.05, far: 100 }}
-      dpr={[1, 2]}
+      dpr={dpr}
       onPointerMissed={(e) => e.type === 'click' && select(null)}
       onCreated={(state) => {
         // Solo en desarrollo: permite inspeccionar el renderer desde la consola (window.__atlas)
         if (import.meta.env.DEV) Object.assign(window, { __atlas: state })
         state.gl.localClippingEnabled = true // planos de corte por material (modo sección)
         state.gl.toneMapping = NeutralToneMapping // en calidad alta lo reemplaza el del post-procesado
+        handleSoftwareRenderer(state.gl)
       }}
     >
       <color attach="background" args={[BACKGROUND]} />
@@ -309,6 +314,7 @@ export function Scene() {
       <StudioFloor />
       <OrbitControls makeDefault target={START.target} enableDamping maxPolarAngle={Math.PI * 0.49} minDistance={0.3} maxDistance={14} />
       <CameraRig />
+      <AdaptiveQuality />
       {highQuality && (
         <Suspense fallback={null}>
           <Effects />

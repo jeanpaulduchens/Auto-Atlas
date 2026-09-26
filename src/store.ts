@@ -16,6 +16,10 @@ export interface AppState {
   bodyOpacity: number
   interior: Interior
   quality: Quality
+  /** Resolución reducida a 1× (la bajó el ajuste automático o no hay tarjeta gráfica). */
+  lowRes: boolean
+  /** Aviso sobre el rendimiento: calidad bajada automáticamente o 3D sin tarjeta gráfica. */
+  perfNotice: 'auto' | 'software' | null
   /** Etiquetas sobre las piezas (se pueden ocultar para solo hacer clic). */
   labels: boolean
   running: boolean
@@ -94,6 +98,8 @@ function saveLabels(on: boolean) {
 export const noneHidden = () => Object.fromEntries(SYSTEM_ORDER.map((s) => [s, false])) as Record<SystemId, boolean>
 
 const carParam = params.get('auto') as CarId | null
+/** La calidad vino fijada en el enlace: el ajuste automático no la toca. */
+export const QUALITY_FROM_URL = params.has('calidad')
 
 export const useStore = create<AppState>((set) => ({
   car: carParam && carParam in CARS ? carParam : 'sedan',
@@ -102,6 +108,8 @@ export const useStore = create<AppState>((set) => ({
   interior: interiorParam && INTERIORS.includes(interiorParam) ? interiorParam : 'translucido',
   // Celulares y tablets (pantalla táctil) parten en Rápida: el post-procesado exige más GPU
   quality: (params.get('calidad') as Quality | null) ?? (window.matchMedia('(pointer: coarse)').matches ? 'rapida' : 'alta'),
+  lowRes: false,
+  perfNotice: null,
   labels: readLabels(),
   running: params.get('running') !== '0',
   rpm: num('rpm', 900),

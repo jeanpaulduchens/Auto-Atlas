@@ -312,6 +312,22 @@ input[type='range'] {
   margin: 0;
   color: var(--muted);
 }
+.gpu {
+  margin: 8px 6px 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text);
+  display: grid;
+  gap: 2px;
+  word-break: break-word;
+}
+.gpu span {
+  color: var(--muted);
+}
+.gpu.bad {
+  color: #fca5a5;
+}
 
 /* ── Cajón de piezas (izquierda) ──────────────────────────────── */
 
@@ -719,6 +735,37 @@ input[type='range'] {
 }
 .tour-dots button.on {
   background: var(--accent);
+}
+
+/* ── Aviso de rendimiento (bajo la barra superior) ────────────── */
+
+.notice {
+  position: fixed;
+  z-index: 21;
+  top: var(--below-top);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 2 * var(--edge)));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px 10px 14px;
+  background: #1e1a10;
+  border: 1px solid rgba(234, 179, 8, 0.45);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.notice p {
+  margin: 0;
+  flex: 1;
+}
+.notice b {
+  color: #fde68a;
+}
+.notice button:not(.icon-btn) {
+  white-space: nowrap;
 }
 
 /* ── Nombre bajo el cursor y pista inicial ────────────────────── */
