@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PARTS, SYSTEMS, SYSTEM_ORDER, partInCar, type SystemId } from '../data/parts'
 import { CYLINDERS, STROKES, TAU, WHEEL_RADIUS, cycleAngle, strokeOf } from '../sim'
 import { CARS, CAR_ORDER } from '../cars'
+import { converterRatio } from '../automatic'
 import { useStore, type Interior, type Quality } from '../store'
 import { toursForCar } from '../data/tours'
 import { endTour, goToStep } from '../tours'
@@ -160,7 +161,10 @@ export function ControlPanel() {
   const collapsed = s.panelCollapsed
   const setCollapsed = (v: boolean) => s.set({ panelCollapsed: v })
   const car = CARS[s.car]
-  const wheelRpm = s.running && !s.clutch && s.gear > 0 ? s.rpm / car.gears[s.gear] / car.finalDrive : 0
+  const automatic = car.modules.includes('caja-automatica')
+  const engaged = automatic || !s.clutch
+  const slip = automatic ? converterRatio(s.gear, s.rpm) : 1
+  const wheelRpm = s.running && engaged && s.gear > 0 ? (s.rpm * slip) / car.gears[s.gear] / car.finalDrive : 0
   const kmh = (wheelRpm * TAU * WHEEL_RADIUS * 60) / 1000
 
   return (
@@ -261,19 +265,23 @@ export function ControlPanel() {
           </section>
 
           <section>
-            <h2>Caja de cambios</h2>
+            <h2>{automatic ? 'Caja automática' : 'Caja de cambios'}</h2>
             <div className="seg gears">
-              {['N', '1', '2', '3', '4', '5'].map((g, i) => (
-                <button key={g} className={s.gear === i ? 'on' : ''} onClick={() => s.set({ gear: i })}>
-                  {g}
+              {car.gears.map((_, i) => (
+                <button key={i} className={s.gear === i ? 'on' : ''} onClick={() => s.set({ gear: i })}>
+                  {i === 0 ? 'N' : automatic ? `D${i}` : i}
                 </button>
               ))}
             </div>
-            <div className="btns">
-              <button className={s.clutch ? 'on' : ''} onClick={() => s.set({ clutch: !s.clutch })}>
-                {s.clutch ? 'Soltar embrague' : 'Pisar embrague'}
-              </button>
-            </div>
+            {automatic ? (
+              <p className="note">En D la caja cambia sola; aquí eliges qué marcha ver. Colores: dorado recibe el giro, rojo frenado, azul entrega.</p>
+            ) : (
+              <div className="btns">
+                <button className={s.clutch ? 'on' : ''} onClick={() => s.set({ clutch: !s.clutch })}>
+                  {s.clutch ? 'Soltar embrague' : 'Pisar embrague'}
+                </button>
+              </div>
+            )}
             <div className="readout">
               <div>
                 <b>{kmh.toFixed(0)}</b> km/h

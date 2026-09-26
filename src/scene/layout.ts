@@ -74,3 +74,11 @@ export const TA_FINAL_X = 0.925 // piñón de ataque, junto a la campana
 export const TA_RING_R = 0.082
 /** Diferencial delantero, en coordenadas del auto (sobre el eje de las ruedas delanteras). */
 export const FRONT_DIFF: P3 = [FRONT_AXLE_X, WHEEL_Y, ENGINE_FRAMES.transversal.position[2] - TA_FINAL_X]
+
+// ── Transeje automático, en coordenadas del conjunto motor ────────────
+// El eje de salida va más lejos del de entrada (0,14 m) para dejar espacio al
+// convertidor de par, y a 0,11 m del diferencial, igual que en el manual.
+export const AT_OUTPUT = { y: 0.4196, z: -0.14 }
+export const AT_PLANET_X = 0.8
+export const AT_CONVERTER_X = 0.955
+export const AT_TRANSFER_X = 0.66

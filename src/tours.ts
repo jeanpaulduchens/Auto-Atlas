@@ -36,7 +36,7 @@ export function goToStep(tourId: string, step: number) {
     ...st.state,
     hidden,
     selected: st.select ?? null,
-    isolate: false,
+    isolate: st.isolate ?? false,
     activeSystem: null,
     tour: { id: tourId, step: i },
     panelCollapsed: true, // más espacio para la vista; se restaura al salir

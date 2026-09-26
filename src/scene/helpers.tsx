@@ -1,6 +1,7 @@
 import { useMemo, useRef, type ReactNode } from 'react'
 import { useFrame } from '@react-three/fiber'
 import {
+  BoxGeometry,
   CatmullRomCurve3,
   ExtrudeGeometry,
   Object3D,
@@ -14,6 +15,7 @@ import {
   type InstancedMesh,
   type Material,
 } from 'three'
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { useStore } from '../store'
 import { TAU, mod } from '../sim'
 import type { V3 } from './Part'
@@ -105,6 +107,48 @@ export function gearGeometry(radius: number, teeth: number, thickness: number, a
   geo.translate(0, 0, -thickness / 2)
   if (axis === 'x') geo.rotateY(Math.PI / 2)
   return geo
+}
+
+/** Corona de dientes internos (engranaje anular), con eje X. */
+export function ringGearGeometry(inner: number, outer: number, teeth: number, thickness: number) {
+  const depth = Math.min(0.008, inner * 0.2)
+  const shape = new Shape()
+  shape.absarc(0, 0, outer, 0, TAU, false)
+  const hole = new Path()
+  const step = TAU / teeth
+  for (let i = 0; i < teeth; i++) {
+    const a = i * step
+    const pts: [number, number][] = [
+      [inner + depth / 2, a],
+      [inner - depth / 2, a + step * 0.2],
+      [inner - depth / 2, a + step * 0.5],
+      [inner + depth / 2, a + step * 0.7],
+    ]
+    pts.forEach(([r, ang], k) => {
+      const x = Math.cos(ang) * r
+      const y = Math.sin(ang) * r
+      if (i === 0 && k === 0) hole.moveTo(x, y)
+      else hole.lineTo(x, y)
+    })
+  }
+  hole.closePath()
+  shape.holes.push(hole)
+  const geo = new ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false, curveSegments: 32 })
+  geo.translate(0, 0, -thickness / 2)
+  geo.rotateY(Math.PI / 2)
+  return geo
+}
+
+/** Rueda de álabes radiales (convertidor de par), con eje X. */
+export function bladeRingGeometry(blades: number, r0: number, r1: number, width: number, twist = 0.35) {
+  return mergeGeometries(
+    Array.from({ length: blades }, (_, k) =>
+      new BoxGeometry(width, r1 - r0, 0.003)
+        .rotateY(twist)
+        .translate(0, (r0 + r1) / 2, 0)
+        .rotateX((k / blades) * TAU),
+    ),
+  )
 }
 
 export function Gear({

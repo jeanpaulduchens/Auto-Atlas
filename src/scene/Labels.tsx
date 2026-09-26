@@ -13,7 +13,7 @@ const SYSTEM_ANCHOR: Record<SystemId, string[]> = {
   electrico: ['bateria'],
   combustible: ['estanque'],
   refrigeracion: ['radiador'],
-  transmision: ['caja-cambios', 'transeje'],
+  transmision: ['caja-cambios', 'transeje', 'caja-automatica'],
   escape: ['silenciador'],
   suspension: ['suspension-delantera'],
   frenos: ['frenos'],

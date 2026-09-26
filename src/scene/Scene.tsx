@@ -5,6 +5,7 @@ import { Box3, NeutralToneMapping, Sphere, Vector3, type PerspectiveCamera } fro
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { TAU, sim } from '../sim'
 import { CARS, hasModule } from '../cars'
+import { converterRatio, stepPlanetary } from '../automatic'
 import { useStore, type CameraView } from '../store'
 import { partBounds, systemBounds } from './registry'
 import { Labels } from './Labels'
@@ -19,6 +20,7 @@ import { Clutch, Drivetrain, Lever } from './Drivetrain'
 import { Engine } from './Engine'
 import { Exhaust, Manifold } from './Exhaust'
 import { FrontDifferential, FrontHalfShafts, TransaxleCase, TransaxleShafts } from './FrontDrive'
+import { AutoTransaxle, Selector } from './AutoTransmission'
 import { ENGINE_FRAMES, engineDirToWorld } from './layout'
 import { Turbo } from './Turbo'
 
@@ -52,7 +54,15 @@ function SimDriver() {
     }
     if (!s.running) return
     const dCrank = (s.rpm / 60) * TAU * s.slow * dt
-    const dInput = s.clutch ? 0 : dCrank
+    const automatic = hasModule(s.car, 'caja-automatica')
+    // Manual: el embrague une o separa. Automática: el convertidor de par desliza un poco
+    const slip = automatic ? converterRatio(s.gear, s.rpm) : 1
+    const dInput = automatic ? dCrank * slip : s.clutch ? 0 : dCrank
+    if (automatic) {
+      stepPlanetary(s.gear, dInput)
+      // El estator queda quieto mientras multiplica el par y gira libre cuando bomba y turbina se igualan
+      if (slip > 0.93) sim.stator += dCrank * 0.9
+    }
     const car = CARS[s.car]
     const dOutput = s.gear > 0 ? dInput / car.gears[s.gear] : 0
     sim.crank += dCrank
@@ -204,6 +214,7 @@ function CarModules() {
   const has = (m: Parameters<typeof hasModule>[1]) => hasModule(carId, m)
   const turbo = has('turbo')
   const manual = has('caja-manual')
+  const automatic = has('caja-automatica')
   const fwd = has('traccion-delantera')
   const rwd = has('traccion-trasera')
   const frame = ENGINE_FRAMES[car.layout]
@@ -223,6 +234,7 @@ function CarModules() {
                 <TransaxleShafts />
               </>
             )}
+            {automatic && fwd && <AutoTransaxle />}
           </group>
           <Cooling layout={car.layout} />
           <Exhaust turbo={turbo} layout={car.layout} />
@@ -235,6 +247,7 @@ function CarModules() {
           <FrontDifferential />
           <FrontHalfShafts />
           {manual && <Lever base={FWD_LEVER_BASE} length={0.32} cables={FWD_SHIFT_CABLES} />}
+          {automatic && <Selector base={FWD_LEVER_BASE} cable={FWD_SHIFT_CABLES} />}
         </>
       )}
       <Chassis layout={car.layout} rear={rwd ? 'rigido' : 'torsion'} />

@@ -42,6 +42,7 @@ src/
   data/parts.ts      Catálogo de piezas: nombre, sistema y explicación (lo que muestra el panel)
   data/tours.ts      Recorridos guiados: pasos, encuadres y textos
   cars.ts            Versiones del auto y sus módulos
+  automatic.ts       Lógica del tren planetario (qué pieza entra, se frena y sale en cada marcha)
   sim.ts             Simulación mecánica: ángulos de cigüeñal, caja, ruedas; ciclo de 4 tiempos
   tours.ts           Navegación de los recorridos guiados
   store.ts           Estado de la interfaz (zustand)
@@ -58,6 +59,7 @@ src/
     Exhaust.tsx      Múltiple, catalizador, silenciador
     Turbo.tsx        Turbocompresor, intercooler y ductos
     FrontDrive.tsx   Tracción delantera: transeje, diferencial delantero, semiejes homocinéticos
+    AutoTransmission.tsx  Caja automática: convertidor de par, tren planetario, frenos y embragues
     Chassis.tsx      Ruedas, frenos, suspensión, chasis, batería, combustible
     Body.tsx         Carrocería e interior
   ui/                Paneles HTML sobre el canvas
@@ -100,5 +102,5 @@ Fuentes a revisar (siempre verificar la licencia de cada modelo):
 - [x] Recorridos guiados paso a paso
 - [x] Corte de sección y etiquetas sobre las piezas
 - [ ] Carrocería con un modelo `.glb` más realista
-- [x] Versiones de auto: sedán clásico, sedán turbo y compacto de tracción delantera
-- [ ] Más versiones: caja automática, eléctrico
+- [x] Versiones de auto: sedán clásico, sedán turbo, compacto manual y compacto automático
+- [ ] Más versiones: eléctrico

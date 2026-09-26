@@ -23,6 +23,8 @@ export interface TourStep {
   state?: TourState
   /** Sistemas ocultos en este paso (si no, los del recorrido). */
   hidden?: SystemId[]
+  /** Deja visible solo la pieza seleccionada (las demás casi transparentes). */
+  isolate?: boolean
 }
 
 export interface Tour {
@@ -223,6 +225,71 @@ export const TOURS: Tour[] = [
         select: 'suspension-trasera-torsion',
         hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'frenos'],
         view: { frame: ['suspension-trasera-torsion'], dir: [-0.6, 0.8, 0.8], zoom: 0.9 },
+      },
+    ],
+  },
+  {
+    id: 'automatica',
+    name: 'La caja automática',
+    blurb: 'Convertidor de par y tren planetario',
+    requires: ['caja-automatica', 'traccion-delantera'],
+    base: { interior: 'seccion', rpm: 1500, slow: 0.05, gear: 1 },
+    hidden: ['carroceria', 'escape', 'electrico', 'combustible', 'refrigeracion', 'suspension', 'frenos', 'ruedas'],
+    steps: [
+      {
+        title: 'Sin pedal de embrague',
+        text: 'Junto al motor va la caja automática. En vez de embrague tiene un convertidor de par, y en vez de pares de engranajes, un tren planetario que da cuatro marchas.',
+        view: { frame: ['convertidor-par', 'caja-automatica'], dir: [1, 0.55, 0.45], zoom: 0.9 },
+      },
+      {
+        title: 'Convertidor de par',
+        text: 'La bomba (plateada) gira con el motor y lanza aceite contra la turbina (dorada), que mueve la caja. Nunca se tocan: por eso el auto puede quedarse detenido en D con el motor andando.',
+        select: 'convertidor-par',
+        state: { rpm: 1000 },
+        view: { frame: ['convertidor-par'], dir: [1, 0.35, 0.3], zoom: 1.2 },
+      },
+      {
+        title: '1ª: la corona frenada',
+        text: 'El motor mueve el sol (dorado), la cinta frena la corona (roja) y los satélites arrastran al portasatélites (azul), que sale 3,47 veces más lento que el motor. Máxima fuerza para partir.',
+        select: 'tren-planetario',
+        state: { gear: 1 },
+        isolate: true,
+        // A lo largo del eje del tren (a lo ancho del auto), para ver sol, satélites y corona
+        view: { frame: ['tren-planetario'], dir: [0.3, 0.25, 1], zoom: 0.75 },
+      },
+      {
+        title: '2ª: el sol frenado',
+        text: 'Ahora el motor mueve la corona y un freno de discos sujeta el sol. El portasatélites sale 1,41 veces más lento: menos fuerza, más velocidad.',
+        select: 'tren-planetario',
+        state: { gear: 2 },
+        isolate: true,
+        // A lo largo del eje del tren (a lo ancho del auto), para ver sol, satélites y corona
+        view: { frame: ['tren-planetario'], dir: [0.3, 0.25, 1], zoom: 0.75 },
+      },
+      {
+        title: '3ª: todo gira junto',
+        text: 'El embrague directo une sol y corona: los satélites ya no pueden girar sobre sí mismos y todo el tren gira como un bloque (todo en dorado), a la misma velocidad que el motor.',
+        select: 'tren-planetario',
+        state: { gear: 3 },
+        isolate: true,
+        // A lo largo del eje del tren (a lo ancho del auto), para ver sol, satélites y corona
+        view: { frame: ['tren-planetario'], dir: [0.3, 0.25, 1], zoom: 0.75 },
+      },
+      {
+        title: '4ª: sobremarcha',
+        text: 'El motor mueve el portasatélites y el sol queda frenado: la corona sale más rápido que el motor (0,71:1). En carretera, el motor gira menos y gasta menos.',
+        select: 'tren-planetario',
+        state: { gear: 4, rpm: 2500 },
+        isolate: true,
+        // A lo largo del eje del tren (a lo ancho del auto), para ver sol, satélites y corona
+        view: { frame: ['tren-planetario'], dir: [0.3, 0.25, 1], zoom: 0.75 },
+      },
+      {
+        title: 'Quién decide',
+        text: 'El cuerpo de válvulas, bajo la caja, manda aceite a presión al freno o embrague de cada marcha. Sus solenoides los controla un computador según la velocidad y el acelerador.',
+        select: 'cuerpo-valvulas',
+        state: { gear: 2 },
+        view: { frame: ['cuerpo-valvulas', 'caja-automatica'], dir: [1, 0.2, 0.5], zoom: 0.9 },
       },
     ],
   },

@@ -15,6 +15,10 @@ export const sim = {
   wheel: 0, // ruedas traseras (y delanteras, rodando)
   fan: 0,
   turbo: 0, // eje del turbo (turbina + compresor)
+  stator: 0, // estator del convertidor de par
+  sun: 0, // tren planetario de la caja automática
+  ring: 0,
+  carrier: 0,
   explode: +(new URLSearchParams(window.location.search).get('explode') ?? 0) || 0, // interpolado hacia el del store
 }
 

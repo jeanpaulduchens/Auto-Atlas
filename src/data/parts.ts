@@ -527,6 +527,82 @@ export const PARTS: Record<string, PartInfo> = {
     ],
   },
 
+  // ── Caja automática ───────────────────────────────────────────
+  'convertidor-par': {
+    name: 'Convertidor de par',
+    system: 'transmision',
+    module: ['caja-automatica', 'traccion-delantera'],
+    summary: 'Reemplaza al embrague: une el motor con la caja a través de aceite, sin pedal.',
+    how: [
+      'La bomba (plateada) gira con el motor y lanza aceite contra la turbina (dorada), que mueve la caja. No se tocan: el aceite hace de unión.',
+      'Con el auto detenido y en D, la turbina puede quedarse quieta mientras el motor gira: por eso el auto no se apaga en un semáforo.',
+      'El estator (al centro) redirige el aceite y multiplica la fuerza al arrancar, hasta el doble.',
+      'A velocidad constante, un embrague de bloqueo une bomba y turbina para no perder energía en el aceite.',
+    ],
+  },
+  'caja-automatica': {
+    name: 'Caja automática (carcasa)',
+    system: 'transmision',
+    module: ['caja-automatica', 'traccion-delantera'],
+    summary: 'Contiene el tren planetario, los frenos y embragues hidráulicos y el diferencial, bañados en aceite especial (ATF).',
+    how: [
+      'No tiene pedal de embrague ni palanca con H: el conductor elige P, R, N o D y la caja cambia de marcha sola.',
+      'El mismo aceite lubrica, enfría y, a presión, acciona los frenos y embragues que eligen cada marcha.',
+    ],
+  },
+  'tren-planetario': {
+    name: 'Tren planetario',
+    system: 'transmision',
+    module: ['caja-automatica', 'traccion-delantera'],
+    summary: 'Un sol al centro, satélites que giran a su alrededor y una corona de dientes internos. Con un solo juego se consiguen varias marchas.',
+    how: [
+      'Cada marcha sale de elegir qué pieza recibe el giro del motor (dorada), cuál se frena (roja) y cuál entrega el giro (azul).',
+      '1ª: entra por el sol, la corona frenada, sale por el portasatélites (3,47:1). 2ª: entra por la corona, el sol frenado (1,41:1).',
+      '3ª: todo unido, gira como un bloque (1:1). 4ª, sobremarcha: entra por el portasatélites, el sol frenado y sale por la corona, más rápido que el motor (0,71:1).',
+      'Si se frena el portasatélites, la corona gira al revés: así se logra la marcha atrás.',
+    ],
+    fact: 'Las cajas reales combinan dos o tres trenes planetarios para lograr 6 a 10 marchas; aquí se muestra uno solo para entender la idea.',
+  },
+  'frenos-embragues': {
+    name: 'Frenos y embragues hidráulicos',
+    system: 'transmision',
+    module: ['caja-automatica', 'traccion-delantera'],
+    summary: 'Sujetan o unen piezas del tren planetario. Al aplicarse (en rojo o dorado) eligen la marcha.',
+    how: [
+      'Freno de cinta: una banda que abraza el tambor de la corona y la detiene (1ª).',
+      'Freno del sol: discos que lo sujetan contra la carcasa (2ª y 4ª).',
+      'Embrague directo: discos que unen sol y corona para que todo gire junto (3ª).',
+      'Los acciona el aceite a presión: al cambiar, uno se suelta mientras el otro se aplica, sin cortar la fuerza.',
+    ],
+  },
+  'eje-salida-automatica': {
+    name: 'Transferencia y eje de salida',
+    system: 'transmision',
+    module: ['caja-automatica', 'traccion-delantera'],
+    summary: 'Llevan el giro del tren planetario al eje de salida y, con su piñón, a la corona del diferencial.',
+    how: ['El engranaje azul gira con la salida del tren planetario y mueve a su pareja en el eje de salida.'],
+  },
+  'cuerpo-valvulas': {
+    name: 'Cuerpo de válvulas',
+    system: 'transmision',
+    module: ['caja-automatica', 'traccion-delantera'],
+    summary: 'El “cerebro hidráulico”: un laberinto de canales y válvulas que manda aceite a presión al freno o embrague de cada marcha.',
+    how: [
+      'Los solenoides (cilindros negros) los controla el computador de la caja según la velocidad, el acelerador y la carga.',
+      'Decide cuándo cambiar: acelerando a fondo retrasa el cambio; con el pie suave, cambia antes para gastar menos.',
+    ],
+  },
+  'palanca-selectora': {
+    name: 'Palanca selectora',
+    system: 'transmision',
+    module: 'caja-automatica',
+    summary: 'P (estacionar), R (reversa), N (neutro) y D (avanzar). En D, la caja elige sola la marcha.',
+    how: [
+      'En P, un trinquete bloquea el eje de salida para que el auto no se mueva.',
+      'Un cable la une a la caja, que va adelante junto al motor.',
+    ],
+  },
+
   // ── Escape ────────────────────────────────────────────────────
   'multiple-escape': {
     name: 'Múltiple de escape',

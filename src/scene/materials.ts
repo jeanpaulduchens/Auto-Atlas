@@ -36,6 +36,7 @@ export const M = {
   rubber: std('#18181b', 0, 0.92),
   tire: std('#151518', 0, 1, { roughnessMap: treadTexture(), bumpMap: treadTexture(), bumpScale: 3 }),
   gold: std('#eab308', 0.95, 0.28),
+  blue: std('#2563eb', 0.6, 0.35),
   copper: std('#c2410c', 0.9, 0.3),
   red: std('#dc2626', 0.3, 0.45),
   friction: std('#78350f', 0.1, 0.9),
