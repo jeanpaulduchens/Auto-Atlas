@@ -13,7 +13,7 @@ const STEP_DEFAULTS: Required<TourState> = {
   clutch: false,
 }
 
-const RESTORED = ['explode', 'bodyOpacity', 'interior', 'running', 'rpm', 'slow', 'gear', 'clutch', 'hidden', 'selected', 'panelCollapsed'] as const
+const RESTORED = ['explode', 'bodyOpacity', 'interior', 'running', 'rpm', 'slow', 'gear', 'clutch', 'hidden', 'selected', 'partsOpen'] as const
 type Saved = Pick<AppState, (typeof RESTORED)[number]>
 
 /** Cómo estaba la vista antes del recorrido, para devolverla al terminar. */
@@ -39,7 +39,7 @@ export function goToStep(tourId: string, step: number) {
     isolate: st.isolate ?? false,
     activeSystem: null,
     tour: { id: tourId, step: i },
-    panelCollapsed: true, // más espacio para la vista; se restaura al salir
+    partsOpen: false, // más espacio para la vista; se restaura al salir
   })
   s.goTo(st.view)
 }

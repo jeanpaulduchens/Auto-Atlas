@@ -12,6 +12,15 @@ npm run dev                            # abre http://localhost:5173
 
 ## Cómo se usa
 
+La interfaz va en los bordes y deja la escena al centro:
+
+- **Arriba:** versión del auto, recorridos guiados, etiquetas, calidad y ayuda (atajos).
+- **Izquierda:** lista de piezas con buscador (tecla `P` la abre o cierra).
+- **Abajo al centro:** desarmar, interior (cerrado / translúcido / corte), carrocería y vista general.
+- **Abajo a la derecha:** mecánica en marcha (rpm, velocidad de la animación, marchas); se minimiza.
+- **Derecha:** ficha de la pieza elegida.
+
+
 - **Versión** (arriba en el panel, o `?auto=sedan-turbo`): cada versión combina módulos (motor, turbo,
   caja, tracción) definidos en `src/cars.ts`. Las piezas del catálogo indican a qué módulo pertenecen,
   y los recorridos, qué módulos necesitan.
@@ -63,7 +72,7 @@ src/
     Electric.tsx     Eléctrico: batería de tracción, inversor, motor, reductora y puerto de carga
     Chassis.tsx      Ruedas, frenos, suspensión, chasis, batería, combustible
     Body.tsx         Carrocería e interior
-  ui/                Paneles HTML sobre el canvas
+  ui/                Interfaz: barra superior, cajón de piezas, barra de vista, mecánica, ficha, recorridos
 ```
 
 **Para agregar una pieza:** créala en `data/parts.ts` con su explicación y envuelve sus mallas en

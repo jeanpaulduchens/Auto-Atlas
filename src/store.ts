@@ -35,7 +35,10 @@ export interface AppState {
   focusNonce: number
   /** Vista de cámara pedida explícitamente (recorridos); n cambia en cada pedido. */
   view: (CameraView & { n: number }) | null
-  panelCollapsed: boolean
+  /** Cajón de piezas (izquierda) abierto. */
+  partsOpen: boolean
+  /** Tarjeta de mecánica (abajo a la derecha) minimizada. */
+  mechMin: boolean
   set: (patch: Partial<AppState>) => void
   toggleLabels: () => void
   setCar: (car: CarId) => void
@@ -113,7 +116,9 @@ export const useStore = create<AppState>((set) => ({
   tour: null,
   focusNonce: 0,
   view: null,
-  panelCollapsed: false,
+  // En pantallas anchas el cajón de piezas parte abierto; en celulares, todo parte recogido
+  partsOpen: window.innerWidth >= 1100,
+  mechMin: window.innerWidth < 760,
   set: (patch) => set(patch),
   setCar: (car) =>
     set((s) => ({

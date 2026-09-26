@@ -1,5 +1,6 @@
 import { PARTS, SYSTEMS } from '../data/parts'
 import { useStore } from '../store'
+import { Icon } from './controls'
 
 export function InfoPanel() {
   const selected = useStore((s) => s.selected)
@@ -22,8 +23,8 @@ export function InfoPanel() {
           </span>
           <h1>{part.name}</h1>
         </div>
-        <button className="icon" onClick={() => select(null)} title="Cerrar">
-          ×
+        <button className="icon-btn" onClick={() => select(null)} title="Cerrar ficha">
+          <Icon name="close" size={16} />
         </button>
       </header>
       <div className="scroll">

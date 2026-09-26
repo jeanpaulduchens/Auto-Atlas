@@ -25,7 +25,25 @@ import { ElectricDrive } from './Electric'
 import { ENGINE_FRAMES, engineDirToWorld } from './layout'
 import { Turbo } from './Turbo'
 
-const HOME = { target: new Vector3(-0.3, 0.6, 0.4), position: new Vector3(4.6, 2.6, 5.6) }
+const HOME_TARGET = new Vector3(0.05, 0.55, 0.15)
+const HOME_POSITION = new Vector3(4.9, 2.6, 5.9)
+
+/**
+ * En pantalla vertical (celular) el auto, que es largo, no cabe a lo ancho:
+ * se abre el ángulo de la cámara y se aleja un poco (alejarla mucho la hundiría en la niebla).
+ */
+const PORTRAIT = window.innerWidth / window.innerHeight < 1
+const FOV = PORTRAIT ? 58 : 38
+
+/** Vista general. */
+function homeView() {
+  const back = PORTRAIT ? 1.6 : 1
+  return {
+    target: HOME_TARGET.clone(),
+    position: HOME_TARGET.clone().add(HOME_POSITION.clone().sub(HOME_TARGET).multiplyScalar(back)),
+  }
+}
+const HOME = homeView()
 
 /** Cámara inicial opcional desde la URL: ?cam=x,y,z&target=x,y,z */
 function vecParam(key: string, fallback: Vector3) {
@@ -125,7 +143,7 @@ function CameraRig() {
     const { selected, activeSystem } = useStore.getState()
     const box = selected ? partBounds(selected) : activeSystem ? systemBounds(activeSystem) : null
     if (!box) {
-      goal.current = { target: HOME.target.clone(), position: HOME.position.clone() }
+      goal.current = homeView()
       return
     }
     const center = box.getCenter(new Vector3())
@@ -269,7 +287,7 @@ export function Scene() {
   return (
     <Canvas
       frameloop={running ? 'always' : 'demand'}
-      camera={{ position: START.position.toArray(), fov: 38, near: 0.05, far: 100 }}
+      camera={{ position: START.position.toArray(), fov: FOV, near: 0.05, far: 100 }}
       dpr={[1, 2]}
       onPointerMissed={(e) => e.type === 'click' && select(null)}
       onCreated={(state) => {

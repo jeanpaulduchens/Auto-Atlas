@@ -1,25 +1,43 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Scene } from './scene/Scene'
-import { ControlPanel } from './ui/ControlPanel'
+import { TopBar } from './ui/TopBar'
+import { PartsDrawer } from './ui/PartsDrawer'
+import { ViewDock } from './ui/ViewDock'
+import { MechanicsCard } from './ui/MechanicsCard'
 import { InfoPanel } from './ui/InfoPanel'
-import { Hud } from './ui/Hud'
 import { TourCard } from './ui/TourCard'
-import { useStore } from './store'
+import { FirstHint, HoverTip } from './ui/HoverTip'
+import { useShortcuts } from './ui/controls'
 import { startTourFromUrl } from './tours'
 import './styles.css'
 
-function Bottom() {
-  return useStore((s) => s.tour) ? <TourCard /> : <Hud />
+/**
+ * Interfaz en los bordes, la escena al centro:
+ * arriba qué ver (versión, recorridos, ajustes) · izquierda la lista de piezas ·
+ * abajo al centro cómo verlo · abajo a la derecha la mecánica · derecha la ficha.
+ */
+function App() {
+  useShortcuts()
+  return (
+    <>
+      <Scene />
+      <TopBar />
+      <PartsDrawer />
+      <InfoPanel />
+      <MechanicsCard />
+      <ViewDock />
+      <TourCard />
+      <FirstHint />
+      <HoverTip />
+    </>
+  )
 }
 
 startTourFromUrl()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Scene />
-    <ControlPanel />
-    <InfoPanel />
-    <Bottom />
+    <App />
   </StrictMode>,
 )
